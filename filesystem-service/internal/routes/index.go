@@ -27,6 +27,9 @@ func Init() http.Handler {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
+	// static file server for uploads
+	r.Mount("/uploads", http.StripPrefix("/uploads", http.FileServer(http.Dir("./uploads"))))
+
 	r.Mount("/uploads", NewFilesystemRoute())
 
 	return r
