@@ -17,6 +17,18 @@ type InventoryHandler interface {
 	CreateProduct(w http.ResponseWriter, r *http.Request)
 	UpdateProduct(w http.ResponseWriter, r *http.Request)
 	DeleteProduct(w http.ResponseWriter, r *http.Request)
+
+	GetIncomings(w http.ResponseWriter, r *http.Request)
+	GetIncoming(w http.ResponseWriter, r *http.Request)
+	CreateIncoming(w http.ResponseWriter, r *http.Request)
+	UpdateIncoming(w http.ResponseWriter, r *http.Request)
+	DeleteIncoming(w http.ResponseWriter, r *http.Request)
+
+	GetOutgoings(w http.ResponseWriter, r *http.Request)
+	GetOutgoing(w http.ResponseWriter, r *http.Request)
+	CreateOutgoing(w http.ResponseWriter, r *http.Request)
+	UpdateOutgoing(w http.ResponseWriter, r *http.Request)
+	DeleteOutgoing(w http.ResponseWriter, r *http.Request)
 }
 
 type inventoryHandler struct {
@@ -24,7 +36,7 @@ type inventoryHandler struct {
 	service services.InventoryService
 }
 
-func NewInventoryHandler(service services.InventoryService) InventoryHandler {
+func NewInventoryHandler() InventoryHandler {
 	return &inventoryHandler{
 		jsonH:   utils.NewJSONHandler(),
 		service: services.NewInventoryService(),
@@ -66,51 +78,13 @@ func (h *inventoryHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 func (h *inventoryHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	slog.Info("CreateProduct Hit")
 	product := new(models.InventoryProduct)
-
-	// get data from multipart/form-data
-	// thumbnail might be empty string or file
-	err := r.ParseMultipartForm(1048576) // one megabyte
-	if err != nil {
-		slog.Error("Error parsing multipart form", "error", err)
+	if err := h.jsonH.ReadJSON(w, r, product); err != nil {
+		slog.Error("Error reading product", "error", err)
 		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
 		return
 	}
 
-	// get data from form
-	product.Code = r.FormValue("code")
-	product.Name = r.FormValue("name")
-	product.Brand = r.FormValue("brand")
-	product.StandardUnit = r.FormValue("standard_unit")
-	product.Supplier = r.FormValue("supplier")
-	product.Remarks = r.FormValue("remarks")
-	product.IsExist, err = strconv.ParseBool(r.FormValue("is_exist"))
-	if err != nil {
-		slog.Error("Error parsing is_exist", "error", err)
-		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
-	product.CreatedBy = r.FormValue("created_by")
-	product.UpdatedBy = r.FormValue("updated_by")
-
-	// get file from form
-	file, header, err := r.FormFile("thumbnail")
-	if err != nil {
-		slog.Error("Error getting thumbnail", "error", err)
-		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	// upload file to cloud storage
-	filename, err := utils.UploadFile(file, header.Filename, "inventory")
-	if err != nil {
-		slog.Error("Error uploading thumbnail", "error", err)
-		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
-		return
-	}
-
-	product.Thumbnail = filename
-
+	var err error
 	product, err = h.service.CreateProduct(product)
 	if err != nil {
 		slog.Error("Error creating product", "error", err)
@@ -162,6 +136,208 @@ func (h *inventoryHandler) DeleteProduct(w http.ResponseWriter, r *http.Request)
 	err = h.service.DeleteProduct(id)
 	if err != nil {
 		slog.Error("Error deleting product", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, nil)
+}
+
+// Incoming
+func (h *inventoryHandler) GetIncomings(w http.ResponseWriter, r *http.Request) {
+	slog.Info("GetIncomings Hit")
+	incomings, err := h.service.GetIncomings()
+	if err != nil {
+		slog.Error("Error getting incomings", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, incomings)
+}
+
+func (h *inventoryHandler) GetIncoming(w http.ResponseWriter, r *http.Request) {
+	slog.Info("GetIncoming Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	incoming, err := h.service.GetIncoming(id)
+	if err != nil {
+		slog.Error("Error getting incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, incoming)
+}
+
+func (h *inventoryHandler) CreateIncoming(w http.ResponseWriter, r *http.Request) {
+	slog.Info("CreateIncoming Hit")
+	incoming := new(models.InventoryIncoming)
+	if err := h.jsonH.ReadJSON(w, r, incoming); err != nil {
+		slog.Error("Error reading incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	var err error
+	incoming, err = h.service.CreateIncoming(incoming)
+	if err != nil {
+		slog.Error("Error creating incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, incoming)
+}
+
+func (h *inventoryHandler) UpdateIncoming(w http.ResponseWriter, r *http.Request) {
+	slog.Info("UpdateIncoming Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	incoming := new(models.InventoryIncoming)
+	err = h.jsonH.ReadJSON(w, r, incoming)
+	if err != nil {
+		slog.Error("Error reading incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	incoming, err = h.service.UpdateIncoming(id, incoming)
+	if err != nil {
+		slog.Error("Error updating incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, incoming)
+}
+
+func (h *inventoryHandler) DeleteIncoming(w http.ResponseWriter, r *http.Request) {
+	slog.Info("DeleteIncoming Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.DeleteIncoming(id)
+	if err != nil {
+		slog.Error("Error deleting incoming", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, nil)
+}
+
+// Outgoing
+func (h *inventoryHandler) GetOutgoings(w http.ResponseWriter, r *http.Request) {
+	slog.Info("GetOutgoings Hit")
+	outgoings, err := h.service.GetOutgoings()
+	if err != nil {
+		slog.Error("Error getting outgoings", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, outgoings)
+}
+
+func (h *inventoryHandler) GetOutgoing(w http.ResponseWriter, r *http.Request) {
+	slog.Info("GetOutgoing Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	outgoing, err := h.service.GetOutgoing(id)
+	if err != nil {
+		slog.Error("Error getting outgoing", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, outgoing)
+}
+
+func (h *inventoryHandler) CreateOutgoing(w http.ResponseWriter, r *http.Request) {
+	slog.Info("CreateOutgoing Hit")
+	outgoing := new(models.InventoryOutgoing)
+	if err := h.jsonH.ReadJSON(w, r, outgoing); err != nil {
+		slog.Error("Error reading outgoing", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	var err error
+	outgoing, err = h.service.CreateOutgoing(outgoing)
+	if err != nil {
+		slog.Error("Error creating outgoing", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, outgoing)
+}
+
+func (h *inventoryHandler) UpdateOutgoing(w http.ResponseWriter, r *http.Request) {
+	slog.Info("UpdateOutgoing Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	outgoing := new(models.InventoryOutgoing)
+	err = h.jsonH.ReadJSON(w, r, outgoing)
+	if err != nil {
+		slog.Error("Error reading outgoing", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	outgoing, err = h.service.UpdateOutgoing(id, outgoing)
+	if err != nil {
+		slog.Error("Error updating outgoing", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, outgoing)
+}
+
+func (h *inventoryHandler) DeleteOutgoing(w http.ResponseWriter, r *http.Request) {
+	slog.Info("DeleteOutgoing Hit")
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		slog.Error("Error parsing id", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.DeleteOutgoing(id)
+	if err != nil {
+		slog.Error("Error deleting outgoing", "error", err)
 		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}

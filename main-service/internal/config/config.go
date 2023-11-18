@@ -13,12 +13,21 @@ type Config struct {
 	PostgresUser     string
 	PostgresPassword string
 	PostgresDBName   string
+	ServerPort       string
 }
 
 var Cfg = new(Config)
 
 func Init() error {
-	if err := godotenv.Load(); err != nil {
+	wd, err := os.Getwd()
+	if err != nil {
+		slog.Error("Error getting working directory", "error", err)
+		return err
+	}
+
+	envLocation := wd + "/.env"
+
+	if err := godotenv.Load(envLocation); err != nil {
 		slog.Error("Error loading .env file", "error", err)
 		return err
 	}
@@ -28,6 +37,8 @@ func Init() error {
 	Cfg.PostgresUser = os.Getenv("POSTGRES_USER")
 	Cfg.PostgresPassword = os.Getenv("POSTGRES_PASSWORD")
 	Cfg.PostgresDBName = os.Getenv("POSTGRES_DB_NAME")
+
+	Cfg.ServerPort = os.Getenv("SERVER_PORT")
 
 	return nil
 }
