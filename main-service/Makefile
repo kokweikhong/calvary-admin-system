@@ -7,7 +7,7 @@ run: build
 	@echo "Running..."
 	@./bin/main-service
 	
-DB_URL=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
+DB_URL=postgres://calvary:calvary@123@localhost:5432/calvary?sslmode=disable
 
 migrate-create:
 	@echo "Creating migration..."

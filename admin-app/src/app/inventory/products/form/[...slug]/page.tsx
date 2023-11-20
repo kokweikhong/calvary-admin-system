@@ -4,7 +4,13 @@ import { InventoryProduct } from "@/app/interfaces/inventory";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import React from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, set, useForm } from "react-hook-form";
+import {
+  useGetInventoryProduct,
+  useCreateInventoryProduct,
+  useUpdateInventoryProduct,
+} from "@/queries/inventory-products";
+import { useUploadFile } from "@/queries/filesystem";
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -32,25 +38,52 @@ export default function InventoryProductFormPage({
 }: {
   params: { slug: string[] };
 }) {
-  console.log(params.slug);
   const formType = params.slug[0];
+  const productId = params.slug.length > 1 ? params.slug[1] : "";
+  const product = useGetInventoryProduct(productId);
+  const createProduct = useCreateInventoryProduct();
+  const updateProduct = useUpdateInventoryProduct(productId);
+  const uploadFile = useUploadFile();
 
-  const [isCoverPhotoChange, setIsCoverPhotoChange] = React.useState(false);
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
 
-  const form = useForm<InventoryProduct>({
-    defaultValues: emptyProduct,
-  });
+  const form = useForm<InventoryProduct>();
 
   const onCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     if (e.target.files && e.target.files.length > 0) {
-      setIsCoverPhotoChange(false);
       setCoverPhoto(e.target.files[0]);
     }
+    console.log(e.target.files);
   };
 
-  const onSubmit: SubmitHandler<InventoryProduct> = (data) => {
+  React.useEffect(() => {
+    if (formType === "create") {
+      form.reset(emptyProduct);
+    } else if (product.data && formType === "update") {
+      form.reset(product.data);
+    }
+  }, [form, formType, product.data]);
+
+  const onSubmit: SubmitHandler<InventoryProduct> = async (data) => {
+    if (coverPhoto) {
+      const formData = new FormData();
+      formData.append("file", coverPhoto);
+      formData.append("saveDir", "inventory/products");
+      await uploadFile.mutateAsync(formData, {
+        onSuccess: (path) => {
+          form.setValue("thumbnail", path);
+          data.thumbnail = path;
+          setCoverPhoto(null);
+        },
+      });
+    }
     console.log(data);
+    if (formType === "create") {
+      await createProduct.mutateAsync(data);
+    } else if (formType === "update") {
+      await updateProduct.mutateAsync(data);
+    }
   };
 
   return (
@@ -62,7 +95,9 @@ export default function InventoryProductFormPage({
               Inventory Product Form
             </h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-600">
-              {formType === "create" ? "Create a new product" : "Edit product"}
+              {formType === "create"
+                ? "Create a new product"
+                : `Update ${product.data?.code}`}
             </p>
 
             <div className="mt-10 space-y-8 border-b border-gray-900/10 pb-12 sm:space-y-0 sm:divide-y sm:divide-gray-900/10 sm:border-t sm:pb-0">
@@ -273,10 +308,60 @@ export default function InventoryProductFormPage({
                 )}
               />
 
+              <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:py-6">
+                <label
+                  htmlFor="photo"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Photo
+                </label>
+                <div className="mt-2 sm:col-span-2 sm:mt-0">
+                  <div className="flex items-center gap-x-3">
+                    {coverPhoto ? (
+                      <React.Fragment>
+                        <span className="inline-flex items-center gap-x-0.5 rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                          new
+                          <button
+                            type="button"
+                            className="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-yellow-600/20"
+                            onClick={() => setCoverPhoto(null)}
+                          >
+                            <span className="sr-only">Remove</span>
+                            <svg
+                              viewBox="0 0 14 14"
+                              className="h-3.5 w-3.5 stroke-yellow-700/50 group-hover:stroke-yellow-700/75"
+                            >
+                              <path d="M4 4l6 6m0-6l-6 6" />
+                            </svg>
+                            <span className="absolute -inset-1" />
+                          </button>
+                        </span>
+                        <span>{coverPhoto.name}</span>
+                      </React.Fragment>
+                    ) : form.watch("thumbnail") !== "" ? (
+                      <React.Fragment>
+                        <span className="inline-flex items-center gap-x-0.5 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                          server
+                        </span>
+                        <span>{form.watch("thumbnail")}</span>
+                      </React.Fragment>
+                    ) : (
+                      <React.Fragment>
+                        <PhotoIcon
+                          className="h-12 w-12 text-gray-300"
+                          aria-hidden="true"
+                        />
+                        <span>No Photo</span>
+                      </React.Fragment>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <Controller
                 control={form.control}
                 name="thumbnail"
-                defaultValue=""
+                defaultValue={""}
                 render={({ field }) => (
                   <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:py-6">
                     <label
@@ -285,27 +370,37 @@ export default function InventoryProductFormPage({
                     >
                       Product Thumbnail
                     </label>
-                    <input type="text" {...field} hidden />
                     <div className="mt-2 sm:col-span-2 sm:mt-0">
-                      {field.value !== "" ||
-                        (coverPhoto && !isCoverPhotoChange && (
-                          <div className="flex max-w-2xl mb-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                            <div className="text-center relative w-full min-h-[300px]">
-                              <Image
-                                src={
-                                  field.value !== ""
-                                    ? field.value
-                                    : coverPhoto
-                                    ? URL.createObjectURL(coverPhoto)
-                                    : ""
-                                }
-                                alt=""
-                                fill
-                                className="object-contain"
+                      <div className="flex max-w-2xl mb-2 justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                        <div className="text-center relative w-full min-h-[300px]">
+                          {coverPhoto ? (
+                            <Image
+                              src={URL.createObjectURL(coverPhoto)}
+                              alt=""
+                              fill
+                              className="object-contain"
+                            />
+                          ) : field.value !== "" ? (
+                            <Image
+                              src={
+                                field.value !== ""
+                                  ? `http://localhost:8080/${field.value}`
+                                  : "/images/placeholder.png"
+                              }
+                              alt=""
+                              fill
+                              className="object-contain"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <PhotoIcon
+                                className="h-12 w-12 text-gray-300"
+                                aria-hidden="true"
                               />
                             </div>
-                          </div>
-                        ))}
+                          )}
+                        </div>
+                      </div>
                       <div className="flex max-w-2xl justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                         <div className="text-center">
                           <PhotoIcon
@@ -343,16 +438,10 @@ export default function InventoryProductFormPage({
 
         <div className="mt-6 flex items-center justify-end gap-x-6">
           <button
-            type="button"
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
             type="submit"
             className="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Save
+            {formType === "create" ? "Create" : "Update"}
           </button>
         </div>
       </form>

@@ -71,7 +71,7 @@ func (s *inventoryService) GetProducts() ([]*models.InventoryProduct, error) {
 	defer rows.Close()
 
 	// iterate over rows
-	var products []*models.InventoryProduct
+	products := []*models.InventoryProduct{}
 	for rows.Next() {
 		product := new(models.InventoryProduct)
 		err := rows.Scan(

@@ -1,6 +1,7 @@
 import SidebarLayout from "@/components/SidebarLayout";
 import { Metadata } from "next";
 import "./globals.css";
+import { QueryProvider } from "@/context/QueryContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,9 +16,11 @@ export default function RootLayout({
   return (
     <>
       <html lang="en" className="h-full bg-white">
-        <body className="h-full">
-          <SidebarLayout>{children}</SidebarLayout>
-        </body>
+        <QueryProvider>
+          <body className="h-full">
+            <SidebarLayout>{children}</SidebarLayout>
+          </body>
+        </QueryProvider>
       </html>
     </>
   );
