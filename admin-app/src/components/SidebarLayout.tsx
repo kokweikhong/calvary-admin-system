@@ -1,13 +1,12 @@
 "use client";
 
-import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
   BellIcon,
   CalendarIcon,
   ChartPieIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   DocumentDuplicateIcon,
   HomeIcon,
   HomeModernIcon,
@@ -16,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React from "react";
+import NavLinks from "./NavLinks";
 
 type NavigatinItem = {
   name: string;
@@ -116,7 +116,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+              <Dialog.Panel className="relative mr-16 flex max-w-xs flex-1">
                 <Transition.Child
                   as={React.Fragment}
                   enter="ease-in-out duration-300"
@@ -149,83 +149,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                       alt="Your Company"
                     />
                   </div>
-                  <nav className="flex flex-1 flex-col">
-                    <ul role="list" className="-mx-2 space-y-1">
-                      {navigations.map((item) => (
-                        <li key={item.name}>
-                          {!item.children ? (
-                            <a
-                              href={item.href}
-                              className={classNames(
-                                item.current
-                                  ? "bg-gray-50"
-                                  : "hover:bg-gray-50",
-                                "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700"
-                              )}
-                            >
-                              <item.icon
-                                className="h-6 w-6 shrink-0 text-gray-400"
-                                aria-hidden="true"
-                              />
-                              {item.name}
-                            </a>
-                          ) : (
-                            <Disclosure as="div">
-                              {({ open }) => (
-                                <>
-                                  <Disclosure.Button
-                                    className={classNames(
-                                      item.current
-                                        ? "bg-gray-50"
-                                        : "hover:bg-gray-50",
-                                      "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold text-gray-700"
-                                    )}
-                                  >
-                                    <item.icon
-                                      className="h-6 w-6 shrink-0 text-gray-400"
-                                      aria-hidden="true"
-                                    />
-                                    {item.name}
-                                    <ChevronRightIcon
-                                      className={classNames(
-                                        open
-                                          ? "rotate-90 text-gray-500"
-                                          : "text-gray-400",
-                                        "ml-auto h-5 w-5 shrink-0"
-                                      )}
-                                      aria-hidden="true"
-                                    />
-                                  </Disclosure.Button>
-                                  <Disclosure.Panel
-                                    as="ul"
-                                    className="mt-1 px-2"
-                                  >
-                                    {item.children?.map((subItem) => (
-                                      <li key={subItem.name}>
-                                        {/* 44px */}
-                                        <Disclosure.Button
-                                          as="a"
-                                          href={subItem.href}
-                                          className={classNames(
-                                            subItem.current
-                                              ? "bg-gray-50"
-                                              : "hover:bg-gray-50",
-                                            "block rounded-md py-2 pr-2 pl-9 text-sm leading-6 text-gray-700"
-                                          )}
-                                        >
-                                          {subItem.name}
-                                        </Disclosure.Button>
-                                      </li>
-                                    ))}
-                                  </Disclosure.Panel>
-                                </>
-                              )}
-                            </Disclosure>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
+                  <NavLinks />
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -244,76 +168,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
               alt="Your Company"
             />
           </div>
-          <nav className="flex flex-1 flex-col">
-            <ul role="list" className="mx-2 space-y-1">
-              {navigations.map((item) => (
-                <li key={item.name}>
-                  {!item.children ? (
-                    <a
-                      href={item.href}
-                      className={classNames(
-                        item.current ? "bg-gray-50" : "hover:bg-gray-50",
-                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700"
-                      )}
-                    >
-                      <item.icon
-                        className="h-6 w-6 shrink-0 text-gray-400"
-                        aria-hidden="true"
-                      />
-                      {item.name}
-                    </a>
-                  ) : (
-                    <Disclosure as="div">
-                      {({ open }) => (
-                        <>
-                          <Disclosure.Button
-                            className={classNames(
-                              item.current ? "bg-gray-50" : "hover:bg-gray-50",
-                              "flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold text-gray-700"
-                            )}
-                          >
-                            <item.icon
-                              className="h-6 w-6 shrink-0 text-gray-400"
-                              aria-hidden="true"
-                            />
-                            {item.name}
-                            <ChevronRightIcon
-                              className={classNames(
-                                open
-                                  ? "rotate-90 text-gray-500"
-                                  : "text-gray-400",
-                                "ml-auto h-5 w-5 shrink-0"
-                              )}
-                              aria-hidden="true"
-                            />
-                          </Disclosure.Button>
-                          <Disclosure.Panel as="ul" className="mt-1 px-2">
-                            {item.children?.map((subItem) => (
-                              <li key={subItem.name}>
-                                {/* 44px */}
-                                <Disclosure.Button
-                                  as="a"
-                                  href={subItem.href}
-                                  className={classNames(
-                                    subItem.current
-                                      ? "bg-gray-50"
-                                      : "hover:bg-gray-50",
-                                    "block rounded-md py-2 pr-2 pl-9 text-sm leading-6 text-gray-700"
-                                  )}
-                                >
-                                  {subItem.name}
-                                </Disclosure.Button>
-                              </li>
-                            ))}
-                          </Disclosure.Panel>
-                        </>
-                      )}
-                    </Disclosure>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <NavLinks />
         </div>
       </div>
 

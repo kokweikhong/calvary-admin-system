@@ -1,19 +1,5 @@
 import { z } from "zod";
 
-// ID           int    `json:"id" db:"id"`
-// Code         string `json:"code" db:"code"`
-// Name         string `json:"name" db:"name"`
-// Brand        string `json:"brand" db:"brand"`
-// StandardUnit string `json:"standardUnit" db:"standard_unit"`
-// Thumbnail    string `json:"thumbnail" db:"thumbnail"`
-// Supplier     string `json:"supplier" db:"supplier"`
-// Remarks      string `json:"remarks" db:"remarks"`
-// IsExist      bool   `json:"isExist" db:"is_exist"`
-// CreatedBy    string `json:"createdBy" db:"created_by"`
-// CreatedAt    string `json:"createdAt" db:"created_at"`
-// UpdatedBy    string `json:"updatedBy" db:"updated_by"`
-// UpdatedAt    string `json:"updatedAt" db:"updated_at"`
-
 export const InventoryProductSchema = z.object({
   id: z.number(),
   code: z.string(),
@@ -31,3 +17,130 @@ export const InventoryProductSchema = z.object({
 });
 
 export type InventoryProduct = z.infer<typeof InventoryProductSchema>;
+
+export const InventoryIncomingSchema = z.object({
+  id: z.number(),
+  productId: z.number(),
+  status: z.string(),
+  quantity: z.number(),
+  length: z.number(),
+  width: z.number(),
+  thickness: z.number(),
+  unit: z.string(),
+  standardQuantity: z.number(),
+  refNo: z.string(),
+  refDoc: z.string(),
+  cost: z.number(),
+  storeLocation: z.string(),
+  storeCountry: z.string(),
+  remarks: z.string(),
+  createdBy: z.string(),
+  createdAt: z.string(),
+  updatedBy: z.string(),
+  updatedAt: z.string(),
+
+  productCode: z.string(),
+  productName: z.string(),
+  standardUnit: z.string(),
+});
+
+export type InventoryIncoming = z.infer<typeof InventoryIncomingSchema>;
+
+export const fakeInventoryIncomings: InventoryIncoming[] = [
+  {
+    id: 1,
+    productId: 1,
+    status: "INCOMING",
+    quantity: 10,
+    length: 10,
+    width: 10,
+    thickness: 10,
+    unit: "mm",
+    standardQuantity: 10,
+    refNo: "1234567890",
+    refDoc: "1234567890",
+    cost: 10,
+    storeLocation: "1234567890",
+    storeCountry: "1234567890",
+    remarks: "1234567890",
+    createdBy: "1234567890",
+    createdAt: "1234567890",
+    updatedBy: "1234567890",
+    updatedAt: "1234567890",
+    productCode: "1234567890a",
+    productName: "1234567890b",
+    standardUnit: "1234567890c",
+  },
+  {
+    id: 2,
+    productId: 2,
+    status: "INCOMING",
+    quantity: 10,
+    length: 10,
+    width: 10,
+    thickness: 10,
+    unit: "mm",
+    standardQuantity: 10,
+    refNo: "1234567890",
+    refDoc: "1234567890",
+    cost: 10,
+    storeLocation: "1234567890",
+    storeCountry: "1234567890",
+    remarks: "1234567890",
+    createdBy: "1234567890",
+    createdAt: "1234567890",
+    updatedBy: "1234567890",
+    updatedAt: "1234567890",
+    productCode: "1234567890d",
+    productName: "1234567890e",
+    standardUnit: "1234567890f",
+  },
+  {
+    id: 3,
+    productId: 3,
+    status: "INCOMING",
+    quantity: 10,
+    length: 10,
+    width: 10,
+    thickness: 10,
+    unit: "mm",
+    standardQuantity: 10,
+    refNo: "1234567890",
+    refDoc: "1234567890",
+    cost: 10,
+    storeLocation: "1234567890",
+    storeCountry: "1234567890",
+    remarks: "1234567890",
+    createdBy: "1234567890",
+    createdAt: "1234567890",
+    updatedBy: "1234567890",
+    updatedAt: "1234567890",
+    productCode: "1234567890g",
+    productName: "1234567890h",
+    standardUnit: "1234567890i",
+  },
+  {
+    id: 4,
+    productId: 4,
+    status: "INCOMING",
+    quantity: 10,
+    length: 10,
+    width: 10,
+    thickness: 10,
+    unit: "mm",
+    standardQuantity: 10,
+    refNo: "1234567890",
+    refDoc: "1234567890",
+    cost: 10,
+    storeLocation: "1234567890",
+    storeCountry: "1234567890",
+    remarks: "1234567890",
+    createdBy: "1234567890",
+    createdAt: "1234567890",
+    updatedBy: "1234567890",
+    updatedAt: "1234567890",
+    productCode: "1234567890j",
+    productName: "1234567890k",
+    standardUnit: "1234567890l",
+  },
+];

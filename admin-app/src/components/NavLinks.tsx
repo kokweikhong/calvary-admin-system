@@ -1,5 +1,3 @@
-"use client";
-
 import { Disclosure } from "@headlessui/react";
 import {
   CalendarIcon,
@@ -10,7 +8,6 @@ import {
   HomeModernIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
 
 type NavigatinItem = {
   name: string;
@@ -56,23 +53,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Navigations = () => {
-  const pathname = usePathname();
-  console.log(pathname);
-
-  navigations.forEach((item) => {
-    if (item.href === pathname) {
-      item.current = true;
-    } else {
-      item.current = false;
-      item.children?.forEach((subItem) => {
-        if (subItem.href === pathname) {
-          subItem.current = true;
-          item.current = true;
-        }
-      });
-    }
-  });
+const NavLinks = () => {
   return (
     <nav className="flex flex-1 flex-col">
       <ul role="list" className="-mx-2 space-y-1">
@@ -145,4 +126,4 @@ const Navigations = () => {
   );
 };
 
-export default Navigations;
+export default NavLinks;

@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useGetInventoryProducts } from "@/queries/inventory-products";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import {
+  useDeleteInventoryProduct,
+  useGetInventoryProducts,
+} from "@/queries/inventory-products";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useDeleteInventoryProduct } from "@/queries/inventory-products";
+import Link from "next/link";
 import Swal from "sweetalert2";
 
 const people = [
@@ -43,11 +46,11 @@ export default function InventoryProductsPage() {
   }
 
   if (products.isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner label="products data" />;
   }
 
   if (products.isError) {
-    return <div>Error loading products</div>;
+    throw new Error(`Error while fetching products: ${products.error}`);
   }
 
   if (!products.data) {

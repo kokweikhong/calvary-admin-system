@@ -1,7 +1,7 @@
 import SidebarLayout from "@/components/SidebarLayout";
+import { QueryProvider } from "@/context/QueryContext";
 import { Metadata } from "next";
 import "./globals.css";
-import { QueryProvider } from "@/context/QueryContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
