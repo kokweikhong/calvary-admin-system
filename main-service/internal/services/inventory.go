@@ -276,27 +276,34 @@ func (s *inventoryService) DeleteProduct(id int) error {
 func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 	queryStr := `
 		SELECT
-			id,
-			product_id,
-			status,
-			quantity,
-			length,
-			width,
-			thickness,
-			unit,
-			standard_quantity,
-			ref_no,
-			ref_doc,
-			cost,
-			store_location,
-			store_country,
-			remarks,
-			created_by,
-			created_at,
-			updated_by,
-			updated_at
+			i.id,
+			i.product_id,
+			i.status,
+			i.quantity,
+			i.length,
+			i.width,
+			i.height,
+			i.unit,
+			i.standard_quantity,
+			i.ref_no,
+			i.ref_doc,
+			i.cost,
+			i.store_location,
+			i.store_country,
+			i.remarks,
+			i.created_by,
+			i.created_at,
+			i.updated_by,
+			i.updated_at,
+			p.code AS product_code,
+			p.name AS product_name,
+			p.standard_unit AS standard_unit
 		FROM
-			inventory_incomings
+			inventory_incomings i
+		LEFT JOIN
+			inventory_products p
+		ON
+			i.product_id = p.id
 	`
 
 	// execute query with context, transaction, and arguments
@@ -320,7 +327,7 @@ func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 			&incoming.Quantity,
 			&incoming.Length,
 			&incoming.Width,
-			&incoming.Thickness,
+			&incoming.Height,
 			&incoming.Unit,
 			&incoming.StandardQuantity,
 			&incoming.RefNo,
@@ -333,6 +340,9 @@ func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 			&incoming.CreatedAt,
 			&incoming.UpdatedBy,
 			&incoming.UpdatedAt,
+			&incoming.ProductCode,
+			&incoming.ProductName,
+			&incoming.StandardUnit,
 		)
 		if err != nil {
 			slog.Error("Error scanning incoming", "error", err)
@@ -362,7 +372,7 @@ func (s *inventoryService) GetIncoming(id int) (*models.InventoryIncoming, error
 			quantity,
 			length,
 			width,
-			thickness,
+			height,
 			unit,
 			standard_quantity,
 			ref_no,
@@ -392,7 +402,7 @@ func (s *inventoryService) GetIncoming(id int) (*models.InventoryIncoming, error
 		&incoming.Quantity,
 		&incoming.Length,
 		&incoming.Width,
-		&incoming.Thickness,
+		&incoming.Height,
 		&incoming.Unit,
 		&incoming.StandardQuantity,
 		&incoming.RefNo,
@@ -424,7 +434,7 @@ func (s *inventoryService) CreateIncoming(incoming *models.InventoryIncoming) (*
 			quantity,
 			length,
 			width,
-			thickness,
+			height,
 			unit,
 			standard_quantity,
 			ref_no,
@@ -452,7 +462,7 @@ func (s *inventoryService) CreateIncoming(incoming *models.InventoryIncoming) (*
 		incoming.Quantity,
 		incoming.Length,
 		incoming.Width,
-		incoming.Thickness,
+		incoming.Height,
 		incoming.Unit,
 		incoming.StandardQuantity,
 		incoming.RefNo,
@@ -484,7 +494,7 @@ func (s *inventoryService) UpdateIncoming(id int, incoming *models.InventoryInco
 			quantity = $3,
 			length = $4,
 			width = $5,
-			thickness = $6,
+			height = $6,
 			unit = $7,
 			standard_quantity = $8,
 			ref_no = $9,
@@ -508,7 +518,7 @@ func (s *inventoryService) UpdateIncoming(id int, incoming *models.InventoryInco
 		incoming.Quantity,
 		incoming.Length,
 		incoming.Width,
-		incoming.Thickness,
+		incoming.Height,
 		incoming.Unit,
 		incoming.StandardQuantity,
 		incoming.RefNo,

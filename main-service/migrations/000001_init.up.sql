@@ -34,14 +34,14 @@ CREATE TABLE IF NOT EXISTS inventory_products (
 );
 
 -- Create the inventory_incoming table
-CREATE TABLE IF NOT EXISTS inventory_incoming (
+CREATE TABLE IF NOT EXISTS inventory_incomings (
     id SERIAL PRIMARY KEY,
     product_id INTEGER REFERENCES inventory_products(id) NOT NULL,
     status VARCHAR(255) NOT NULL DEFAULT '',
     quantity NUMERIC NOT NULL DEFAULT 0,
     length NUMERIC NOT NULL DEFAULT 0,
     width NUMERIC NOT NULL DEFAULT 0,
-    thickness NUMERIC NOT NULL DEFAULT 0,
+    height NUMERIC NOT NULL DEFAULT 0,
     unit VARCHAR(255) NOT NULL DEFAULT '',
     standard_quantity NUMERIC NOT NULL DEFAULT 0,
     ref_no VARCHAR(255) NOT NULL DEFAULT '',
@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS inventory_incoming (
 );
 
 -- Create the inventory_outgoing table
-CREATE TABLE IF NOT EXISTS inventory_outgoing (
+CREATE TABLE IF NOT EXISTS inventory_outgoings (
     id SERIAL PRIMARY KEY,
-    incoming_id INTEGER REFERENCES inventory_incoming(id) NOT NULL,
+    incoming_id INTEGER REFERENCES inventory_incomings(id) NOT NULL,
     product_id INTEGER REFERENCES inventory_products(id) NOT NULL,
     status VARCHAR(255) NOT NULL DEFAULT '',
     quantity NUMERIC NOT NULL DEFAULT 0,

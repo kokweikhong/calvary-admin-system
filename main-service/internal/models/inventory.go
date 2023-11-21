@@ -22,7 +22,7 @@ type InventoryIncoming struct {
 	Quantity         float64 `json:"quantity" db:"quantity"`
 	Length           float64 `json:"length" db:"length"`
 	Width            float64 `json:"width" db:"width"`
-	Thickness        float64 `json:"thickness" db:"thickness"`
+	Height           float64 `json:"height" db:"height"`
 	Unit             string  `json:"unit" db:"unit"`
 	StandardQuantity float64 `json:"standardQuantity" db:"standard_quantity"`
 	RefNo            string  `json:"refNo" db:"ref_no"`
@@ -35,6 +35,10 @@ type InventoryIncoming struct {
 	CreatedAt        string  `json:"createdAt" db:"created_at"`
 	UpdatedBy        string  `json:"updatedBy" db:"updated_by"`
 	UpdatedAt        string  `json:"updatedAt" db:"updated_at"`
+
+	ProductCode  string `json:"productCode" db:"product_code"`
+	ProductName  string `json:"productName" db:"product_name"`
+	StandardUnit string `json:"standardUnit" db:"standard_unit"`
 }
 
 type InventoryOutgoing struct {

@@ -30,6 +30,8 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { FC, Fragment, useEffect, useState } from "react";
+import { useGetIncomings } from "@/queries/inventory-incoming";
+import InventoryTable from "@/components/InventoryTable";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -108,36 +110,56 @@ const DropdownMenu: FC<DropdownMenuProps> = ({ incomingId }) => {
   );
 };
 
-const searchableColumns: { label: string; value: string }[] = [
+type SearchableColumn = {
+  label: string;
+  value: string;
+  placeholder: string;
+};
+
+const searchableColumns: SearchableColumn[] = [
   {
     label: "P.Code",
     value: "productCode",
+    placeholder: "Search by product code",
   },
   {
     label: "P.Name",
     value: "productName",
+    placeholder: "Search by product name",
   },
   {
     label: "Std.Unit",
     value: "standardUnit",
+    placeholder: "Search by standard unit",
   },
   {
     label: "Country",
     value: "storeCountry",
+    placeholder: "Search by store country",
   },
   {
     label: "Location",
     value: "storeLocation",
+    placeholder: "Search by store location",
   },
 ];
 
 // @ts-ignore
 const SearchMultipleColumns = ({ table }: { table: Table<T> }) => {
-  const [keyword, setKeyword] = useState("productCode");
+  const [keyword, setKeyword] = useState<SearchableColumn>(
+    searchableColumns[0]
+  );
 
   function handleKeywordChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    // set debounce to 300ms
     table.resetColumnFilters();
-    setKeyword(e.target.value);
+    setInterval(() => {
+      setKeyword(
+        (prev) =>
+          searchableColumns.find((column) => column.value === e.target.value) ??
+          prev
+      );
+    }, 300);
   }
 
   return (
@@ -146,13 +168,17 @@ const SearchMultipleColumns = ({ table }: { table: Table<T> }) => {
         <input
           type="text"
           name="search-multiple"
-          className="block w-full rounded-md border-0 p-2 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          placeholder={`Search for ${keyword}`}
+          className="block w-full rounded-md border-0 p-2 pr-28 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+          placeholder={`${keyword.placeholder}`}
           value={
-            (table.getColumn(`${keyword}`)?.getFilterValue() as string) ?? ""
+            (table
+              .getColumn(`${keyword?.value}`)
+              ?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn(`${keyword}`)?.setFilterValue(event.target.value)
+            table
+              .getColumn(`${keyword?.value}`)
+              ?.setFilterValue(event.target.value)
           }
         />
         <div className="absolute inset-y-0 right-0 flex items-center">
@@ -199,7 +225,7 @@ function DebouncedInput({
     }, debounce);
 
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [debounce, onChange, value]);
 
   return (
     <input
@@ -227,7 +253,8 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 const columnHelper = createColumnHelper<InventoryIncoming>();
 
 export default function InventoryIncomingPage() {
-  const incomings: InventoryIncoming[] = fakeInventoryIncomings;
+  const { data: incomings, isLoading, isError, error } = useGetIncomings();
+  // const incomings: InventoryIncoming[] = fakeInventoryIncomings;
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -285,7 +312,7 @@ export default function InventoryIncomingPage() {
     columnHelper.accessor("width", {
       header: "W",
     }),
-    columnHelper.accessor("thickness", {
+    columnHelper.accessor("height", {
       header: "H",
     }),
     columnHelper.accessor("storeCountry", {
@@ -323,6 +350,14 @@ export default function InventoryIncomingPage() {
     debugColumns: false,
   });
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    throw error;
+  }
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div>
@@ -344,57 +379,14 @@ export default function InventoryIncomingPage() {
             </Link>
           </div>
         </div>
-        <div className="flex items-center">
-          <DebouncedInput
-            value={globalFilter ?? ""}
-            onChange={(value) => setGlobalFilter(String(value))}
-            placeholder="Search all columns..."
-          />
+        <div className="my-2 flex items-center">
           <SearchMultipleColumns table={table} />
         </div>
       </div>
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        scope="col"
-                        className="whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-0"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <InventoryTable table={table} />
           </div>
         </div>
       </div>

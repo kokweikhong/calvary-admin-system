@@ -1,6 +1,17 @@
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { InventoryProduct } from "@/app/interfaces/inventory";
+import { FilterFn } from "@tanstack/react-table";
+import { RankingInfo } from "@tanstack/match-sorter-utils";
+
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
 
 const inProductsURL = "http://localhost:8080/api/v1/inventory/products";
 
