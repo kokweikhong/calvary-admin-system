@@ -17,6 +17,7 @@ type InventoryHandler interface {
 	CreateProduct(w http.ResponseWriter, r *http.Request)
 	UpdateProduct(w http.ResponseWriter, r *http.Request)
 	DeleteProduct(w http.ResponseWriter, r *http.Request)
+	GetProductSummary(w http.ResponseWriter, r *http.Request)
 
 	GetIncomings(w http.ResponseWriter, r *http.Request)
 	GetIncoming(w http.ResponseWriter, r *http.Request)
@@ -141,6 +142,18 @@ func (h *inventoryHandler) DeleteProduct(w http.ResponseWriter, r *http.Request)
 	}
 
 	h.jsonH.WriteJSON(w, http.StatusOK, nil)
+}
+
+func (h *inventoryHandler) GetProductSummary(w http.ResponseWriter, r *http.Request) {
+	slog.Info("GetProductSummary Hit")
+	productSummaries, err := h.service.GetProductSummary()
+	if err != nil {
+		slog.Error("Error getting product summaries", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, productSummaries)
 }
 
 // Incoming

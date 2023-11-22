@@ -15,6 +15,7 @@ type InventoryService interface {
 	CreateProduct(product *models.InventoryProduct) (*models.InventoryProduct, error)
 	UpdateProduct(id int, product *models.InventoryProduct) (*models.InventoryProduct, error)
 	DeleteProduct(id int) error
+	GetProductSummary() ([]*models.InventoryProductSummary, error)
 
 	GetIncomings() ([]*models.InventoryIncoming, error)
 	GetIncoming(id int) (*models.InventoryIncoming, error)
@@ -270,6 +271,90 @@ func (s *inventoryService) DeleteProduct(id int) error {
 	slog.Info("Successfully deleted product", "product", id)
 
 	return nil
+}
+
+func (s *inventoryService) GetProductSummary() ([]*models.InventoryProductSummary, error) {
+	queryStr := `
+		SELECT
+			p.id,
+			p.code,
+			p.name,
+			p.brand,
+			p.standard_unit,
+			p.thumbnail,
+			p.supplier,
+			p.remarks,
+			p.is_exist,
+			p.created_by,
+			p.created_at,
+			p.updated_by,
+			p.updated_at,
+			COALESCE(SUM(i.standard_quantity), 0) AS total_incoming,
+			COALESCE(SUM(o.standard_quantity), 0) AS total_outgoing,
+			COALESCE(SUM(i.standard_quantity), 0) - COALESCE(SUM(o.standard_quantity), 0) AS total_balance
+		FROM
+			inventory_products p
+		LEFT JOIN
+			inventory_incomings i
+		ON
+			p.id = i.product_id
+		LEFT JOIN
+			inventory_outgoings o
+		ON
+			p.id = o.product_id
+		GROUP BY
+			p.id
+	`
+
+	// execute query with context, transaction, and arguments
+	rows, err := s.db.QueryContext(context.Background(), queryStr)
+	if err != nil {
+		slog.Error("Error querying products", "error", err)
+		return nil, err
+	}
+
+	// close rows after function returns
+	defer rows.Close()
+
+	// iterate over rows
+	products := []*models.InventoryProductSummary{}
+	for rows.Next() {
+		product := new(models.InventoryProductSummary)
+		err := rows.Scan(
+			&product.ID,
+			&product.Code,
+			&product.Name,
+			&product.Brand,
+			&product.StandardUnit,
+			&product.Thumbnail,
+			&product.Supplier,
+			&product.Remarks,
+			&product.IsExist,
+			&product.CreatedBy,
+			&product.CreatedAt,
+			&product.UpdatedBy,
+			&product.UpdatedAt,
+			&product.TotalIncoming,
+			&product.TotalOutgoing,
+			&product.TotalBalance,
+		)
+		if err != nil {
+			slog.Error("Error scanning product", "error", err)
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	// check for errors after iterating over rows
+	if err := rows.Err(); err != nil {
+		slog.Error("Error iterating over products", "error", err)
+		return nil, err
+	}
+
+	slog.Info("Successfully queried products", "products", len(products))
+
+	return products, nil
 }
 
 // Incoming

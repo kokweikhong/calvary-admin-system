@@ -1,56 +1,54 @@
 "use client";
 
 import {
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   InventoryProduct,
   fakeInventoryProducts,
+  InventoryProductSummary,
 } from "../../interfaces/inventory";
+import {
+  useGetInventoryProducts,
+  useGetInventoryProductSummary,
+} from "@/queries/inventory-products";
+import { config } from "@/interfaces/config";
 
 export default function InventoryPage() {
-  const products: InventoryProduct[] = fakeInventoryProducts;
+  // const products: InventoryProduct[] = fakeInventoryProducts;
+  const {
+    data: products,
+    isLoading,
+    isError,
+    error,
+  } = useGetInventoryProductSummary();
 
-  const [filteredProducts, setFilteredProducts] =
-    useState<InventoryProduct[]>(products);
+  const [filteredProducts, setFilteredProducts] = useState<
+    InventoryProductSummary[]
+  >([]);
 
   // maximum of 8 products per page
   const [productsPerPage, setProductsPerPage] = useState(8);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  // const [pageNumbers, setPageNumbers] = useState<number[]>([]);
-  // const [pageProducts, setPageProducts] = useState<InventoryProduct[]>([]);
-  // function handlePageChange(page: number) {
-  //   setCurrentPage(page);
-  //   const start = (page - 1) * productsPerPage;
-  //   const end = start + productsPerPage;
-  //   setPageProducts(filteredProducts.slice(start, end));
-  // }
-  // useEffect(() => {
-  //   const pages = [];
-  //   for (let i = 1; i <= totalPages; i++) {
-  //     pages.push(i);
-  //   }
-  //   setPageNumbers(pages);
-  //   handlePageChange(1);
-  // }, [totalPages]);
-  // useEffect(() => {
-  //   setTotalPages(Math.ceil(filteredProducts.length / productsPerPage));
-  // }, [filteredProducts, productsPerPage]);
-  // useEffect(() => {
-  //   handlePageChange(currentPage);
-  // }, [currentPage]);
-  // useEffect(() => {
-  //   handlePageChange(1);
-  // }, [filteredProducts]);
+  useEffect(() => {
+    if (!products) return;
+    setFilteredProducts(products);
+  }, [products]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {`${error}`}</div>;
 
   function handleFilter(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!products) return;
     const value = e.target.value.toLowerCase();
     const filtered = products.filter((product) => {
       return (
@@ -102,15 +100,20 @@ export default function InventoryPage() {
                     key={product.id}
                     className="group relative border-b border-r border-gray-200 p-4 sm:p-6"
                   >
-                    <div className="relative aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
                       {product.thumbnail !== "" ? (
                         <Image
                           loader={({ src, width, quality }) => {
-                            return `${src}?w=${width}&q=${quality || 75}`;
+                            return `${
+                              config.MainServiceURL
+                            }/${src}?w=${width}&q=${quality || 75}`;
                           }}
                           src={product.thumbnail}
                           alt={`${product.name} product shot`}
-                          fill
+                          sizes="100vw"
+                          width={500}
+                          height={500}
+                          priority={true}
                           className="h-full w-full object-cover object-center"
                         />
                       ) : (
@@ -127,17 +130,37 @@ export default function InventoryPage() {
                           {product.name}
                         </a>
                       </h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {product.code}
+                      </p>
                       <div className="mt-3 flex flex-col items-center">
-                        <p className="mt-1 text-sm text-gray-500">
-                          {product.code}
-                        </p>
                         <p className="mt-1 text-sm text-gray-500">
                           {product.brand}
                         </p>
                       </div>
-                      <p className="mt-4 text-base font-medium text-gray-900">
-                        15 mm
-                      </p>
+                      <div className="mt-4 text-base font-medium text-gray-900">
+                        <div className="inline-flex items-center space-x-1">
+                          <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                            <ArrowRightCircleIcon className="w-4 h-4 mr-1" />
+                            <span>{product.totalIncoming.toFixed(0)}</span>
+                          </span>
+                          <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-green-600/20">
+                            <ArrowLeftCircleIcon className="w-4 h-4 mr-1" />
+                            <span>{product.totalOutgoing.toFixed(0)}</span>
+                          </span>
+                        </div>
+                        <span className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-200">
+                          <svg
+                            className="h-1.5 w-1.5 fill-yellow-500"
+                            viewBox="0 0 6 6"
+                            aria-hidden="true"
+                          >
+                            <circle cx={3} cy={3} r={3} />
+                          </svg>
+                          {product.totalBalance.toFixed(0)}{" "}
+                          {product.standardUnit}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}

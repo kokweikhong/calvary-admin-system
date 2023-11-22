@@ -57,3 +57,10 @@ type InventoryOutgoing struct {
 	UpdatedBy        string  `json:"updatedBy" db:"updated_by"`
 	UpdatedAt        string  `json:"updatedAt" db:"updated_at"`
 }
+
+type InventoryProductSummary struct {
+	InventoryProduct
+	TotalIncoming float64 `json:"totalIncoming" db:"total_incoming"`
+	TotalOutgoing float64 `json:"totalOutgoing" db:"total_outgoing"`
+	TotalBalance  float64 `json:"totalBalance" db:"total_balance"`
+}

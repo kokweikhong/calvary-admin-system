@@ -1,4 +1,7 @@
-import { InventoryProduct } from "@/interfaces/inventory";
+import {
+  InventoryProduct,
+  InventoryProductSummary,
+} from "@/interfaces/inventory";
 import { RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterFn } from "@tanstack/react-table";
 import axios from "axios";
@@ -78,4 +81,11 @@ export const useDeleteInventoryProduct = () => {
       },
     }
   );
+};
+
+export const useGetInventoryProductSummary = () => {
+  return useQuery("inventory-product-summary", async () => {
+    const { data } = await axios.get(`${inProductsURL}/summary`);
+    return data as InventoryProductSummary[];
+  });
 };

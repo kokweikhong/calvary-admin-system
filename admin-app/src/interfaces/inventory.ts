@@ -18,6 +18,17 @@ export const InventoryProductSchema = z.object({
 
 export type InventoryProduct = z.infer<typeof InventoryProductSchema>;
 
+// extend interface
+export const InventoryProductSummarySchema = InventoryProductSchema.extend({
+  totalIncoming: z.number(),
+  totalOutgoing: z.number(),
+  totalBalance: z.number(),
+});
+
+export type InventoryProductSummary = z.infer<
+  typeof InventoryProductSummarySchema
+>;
+
 export const InventoryIncomingSchema = z.object({
   id: z.number(),
   productId: z.number(),

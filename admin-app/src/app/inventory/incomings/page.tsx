@@ -1,9 +1,9 @@
 "use client";
 
-import InventoryTable from "@/components/InventoryTable";
+import { InventoryTable, Pagination } from "@/components/InventoryTable";
 import { InventoryIncoming } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
-import { useGetIncomings } from "@/queries/inventory-incoming";
+import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
 import { Menu, Transition } from "@headlessui/react";
 import {
   DocumentTextIcon,
@@ -28,6 +28,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { FC, Fragment, useEffect, useState } from "react";
+import { config } from "@/interfaces/config";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -249,7 +250,12 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 const columnHelper = createColumnHelper<InventoryIncoming>();
 
 export default function InventoryIncomingPage() {
-  const { data: incomings, isLoading, isError, error } = useGetIncomings();
+  const {
+    data: incomings,
+    isLoading,
+    isError,
+    error,
+  } = useGetInventoryIncomings();
   // const incomings: InventoryIncoming[] = fakeInventoryIncomings;
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -272,7 +278,10 @@ export default function InventoryIncomingPage() {
     columnHelper.accessor("refNo", {
       header: "Doc",
       cell: (info) => (
-        <a href={`${info.row.original.refDoc}`}>
+        <a
+          target="_blank"
+          href={`${config.MainServiceURL}/${info.row.original.refDoc}`}
+        >
           <DocumentTextIcon className="w-4 h-4" />
         </a>
       ),
@@ -323,7 +332,7 @@ export default function InventoryIncomingPage() {
   ];
 
   const table = useReactTable({
-    data: incomings,
+    data: incomings ?? [],
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -385,6 +394,9 @@ export default function InventoryIncomingPage() {
             <InventoryTable table={table} />
           </div>
         </div>
+      </div>
+      <div className="px-4 py-4 sm:px-6">
+        <Pagination table={table} />
       </div>
     </div>
   );

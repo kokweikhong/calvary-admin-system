@@ -1,6 +1,6 @@
 "use client";
 
-import InventoryTable from "@/components/InventoryTable";
+import { InventoryTable } from "@/components/InventoryTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { InventoryProduct } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
@@ -30,12 +30,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
+import Image from "next/image";
 import { FC, Fragment, useState } from "react";
 import Swal from "sweetalert2";
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import { config } from "@/interfaces/config";
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
@@ -139,9 +137,17 @@ export default function InventoryProductsPage() {
     columnHelper.accessor("thumbnail", {
       header: "Doc",
       cell: (info) => (
-        <a href={`${info.row.original.thumbnail}`}>
-          <DocumentTextIcon className="w-4 h-4" />
-        </a>
+        <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+          <Image
+            src={`${config.MainServiceURL}/${info.row.original.thumbnail}`}
+            alt="Profile Image"
+            sizes="100vw"
+            width={50}
+            height={50}
+            priority={true}
+            className="h-full w-full object-cover object-center"
+          />
+        </div>
       ),
     }),
     columnHelper.accessor("code", {

@@ -16,6 +16,8 @@ func NewInventoryRouter() chi.Router {
 	r.Put("/products/{id}", h.UpdateProduct)
 	r.Delete("/products/{id}", h.DeleteProduct)
 
+	r.Get("/products/summary", h.GetProductSummary)
+
 	// Incoming
 	r.Get("/incomings", h.GetIncomings)
 	r.Get("/incomings/{id}", h.GetIncoming)
