@@ -4,16 +4,9 @@ import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
   BellIcon,
-  CalendarIcon,
-  ChartPieIcon,
   ChevronDownIcon,
-  DocumentDuplicateIcon,
-  HomeIcon,
-  HomeModernIcon,
-  UsersIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
 import React from "react";
 import NavLinks from "./NavLinks";
 
@@ -29,34 +22,6 @@ type NavigatinItem = {
   }[];
 };
 
-const navigations: NavigatinItem[] = [
-  { name: "Home", href: "/", icon: HomeIcon, current: true },
-  {
-    name: "Inventory",
-    icon: HomeModernIcon,
-    current: false,
-    children: [
-      { name: "Dashboard", href: "/inventory", current: false },
-      { name: "Products", href: "/inventory/products", current: false },
-      { name: "Incomings", href: "/inventory/incomings", current: false },
-      { name: "Outgoings", href: "/inventory/outgoings", current: false },
-    ],
-  },
-  {
-    name: "Teams",
-    icon: UsersIcon,
-    current: false,
-    children: [
-      { name: "Engineering", href: "#", current: false },
-      { name: "Human Resources", href: "#", current: false },
-      { name: "Customer Success", href: "#", current: false },
-    ],
-  },
-  { name: "Calendar", href: "#", icon: CalendarIcon, current: false },
-  { name: "Documents", href: "#", icon: DocumentDuplicateIcon, current: false },
-  { name: "Reports", href: "#", icon: ChartPieIcon, current: false },
-];
-
 const userNavigation = [
   { name: "Your profile", href: "#" },
   { name: "Sign out", href: "#" },
@@ -68,23 +33,6 @@ function classNames(...classes: string[]) {
 
 const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
-  const pathname = usePathname();
-  console.log(pathname);
-
-  navigations.forEach((item) => {
-    if (item.href === pathname) {
-      item.current = true;
-    } else {
-      item.current = false;
-      item.children?.forEach((subItem) => {
-        if (subItem.href === pathname) {
-          subItem.current = true;
-          item.current = true;
-        }
-      });
-    }
-  });
 
   return (
     <div>

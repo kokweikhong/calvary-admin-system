@@ -1,5 +1,21 @@
 "use client";
 
+import InventoryTable from "@/components/InventoryTable";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { InventoryProduct } from "@/interfaces/inventory";
+import { cn } from "@/lib/utils";
+import {
+  useDeleteInventoryProduct,
+  useGetInventoryProducts,
+} from "@/queries/inventory-products";
+import { Menu, Transition } from "@headlessui/react";
+import {
+  DocumentTextIcon,
+  EllipsisVerticalIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { rankItem } from "@tanstack/match-sorter-utils";
 import {
   ColumnFiltersState,
   FilterFn,
@@ -13,26 +29,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import {
-  useDeleteInventoryProduct,
-  useGetInventoryProducts,
-} from "@/queries/inventory-products";
-import {
-  DocumentTextIcon,
-  EllipsisVerticalIcon,
-  PencilIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
 import Link from "next/link";
-import Swal from "sweetalert2";
-import InventoryTable from "@/components/InventoryTable";
-import { cn } from "@/lib/utils";
-import { InventoryProduct } from "@/app/interfaces/inventory";
 import { FC, Fragment, useState } from "react";
-import { Menu, Transition } from "@headlessui/react";
-import { rankItem } from "@tanstack/match-sorter-utils";
+import Swal from "sweetalert2";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");

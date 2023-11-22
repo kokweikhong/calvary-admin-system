@@ -1,3 +1,5 @@
+"use client";
+
 import { Disclosure } from "@headlessui/react";
 import {
   CalendarIcon,
@@ -8,6 +10,7 @@ import {
   HomeModernIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { usePathname } from "next/navigation";
 
 type NavigatinItem = {
   name: string;
@@ -39,7 +42,7 @@ const navigations: NavigatinItem[] = [
     icon: UsersIcon,
     current: false,
     children: [
-      { name: "Engineering", href: "#", current: false },
+      { name: "Dashboard", href: "/teams", current: false },
       { name: "Human Resources", href: "#", current: false },
       { name: "Customer Success", href: "#", current: false },
     ],
@@ -54,6 +57,21 @@ function classNames(...classes: string[]) {
 }
 
 const NavLinks = () => {
+  const pathname = usePathname();
+
+  navigations.forEach((item) => {
+    if (item.href === pathname) {
+      item.current = true;
+    } else {
+      item.current = false;
+      item.children?.forEach((subItem) => {
+        if (subItem.href === pathname) {
+          subItem.current = true;
+          item.current = true;
+        }
+      });
+    }
+  });
   return (
     <nav className="flex flex-1 flex-col">
       <ul role="list" className="-mx-2 space-y-1">

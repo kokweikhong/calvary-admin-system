@@ -1,28 +1,28 @@
+import { InventoryIncoming } from "@/interfaces/inventory";
 import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import { InventoryProduct } from "@/app/interfaces/inventory";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const inIncomingURL = `${process.env.NEXT_PUBLIC_MAIN_SERVICE_URL}/api/v1/inventory/incomings`;
 console.log(inIncomingURL);
 
-export const useGetIncomings = () => {
+export const useGetInventoryIncomings = () => {
   return useQuery("incomings", async () => {
     const { data } = await axios.get(inIncomingURL);
-    return data;
+    return data as InventoryIncoming[];
   });
 };
 
-export const useGetIncoming = (id: string) => {
+export const useGetInventoryIncoming = (id: string) => {
   return useQuery(["incoming", id], async () => {
     const { data } = await axios.get(`${inIncomingURL}/${id}`);
-    return data;
+    return data as InventoryIncoming;
   });
 };
 
-export const useCreateIncoming = () => {
+export const useCreateInventoryIncoming = () => {
   const queryClient = useQueryClient();
   return useMutation(
-    async (incoming: InventoryProduct) => {
+    async (incoming: InventoryIncoming) => {
       const { data } = await axios.post(inIncomingURL, incoming);
       return data;
     },
@@ -34,10 +34,10 @@ export const useCreateIncoming = () => {
   );
 };
 
-export const useUpdateIncoming = (id: string) => {
+export const useUpdateInventoryIncoming = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation(
-    async (incoming: InventoryProduct) => {
+    async (incoming: InventoryIncoming) => {
       const { data } = await axios.put(`${inIncomingURL}/${id}`, incoming);
       return data;
     },
@@ -49,7 +49,7 @@ export const useUpdateIncoming = (id: string) => {
   );
 };
 
-export const useDeleteIncoming = () => {
+export const useDeleteInventoryIncoming = () => {
   const queryClient = useQueryClient();
   return useMutation(
     async (id: string) => {

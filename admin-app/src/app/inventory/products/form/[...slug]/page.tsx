@@ -1,16 +1,16 @@
 "use client";
 
-import { InventoryProduct } from "@/app/interfaces/inventory";
+import { InventoryProduct } from "@/interfaces/inventory";
+import { useUploadFile } from "@/queries/filesystem";
+import {
+  useCreateInventoryProduct,
+  useGetInventoryProduct,
+  useUpdateInventoryProduct,
+} from "@/queries/inventory-products";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import React from "react";
-import { Controller, SubmitHandler, set, useForm } from "react-hook-form";
-import {
-  useGetInventoryProduct,
-  useCreateInventoryProduct,
-  useUpdateInventoryProduct,
-} from "@/queries/inventory-products";
-import { useUploadFile } from "@/queries/filesystem";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 const emptyProduct: InventoryProduct = {
   id: 0,

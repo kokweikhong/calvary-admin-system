@@ -1,8 +1,8 @@
-import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import { InventoryProduct } from "@/app/interfaces/inventory";
-import { FilterFn } from "@tanstack/react-table";
+import { InventoryProduct } from "@/interfaces/inventory";
 import { RankingInfo } from "@tanstack/match-sorter-utils";
+import { FilterFn } from "@tanstack/react-table";
+import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {

@@ -1,10 +1,9 @@
 "use client";
 
-import {
-  InventoryIncoming,
-  fakeInventoryIncomings,
-} from "@/app/interfaces/inventory";
+import InventoryTable from "@/components/InventoryTable";
+import { InventoryIncoming } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
+import { useGetIncomings } from "@/queries/inventory-incoming";
 import { Menu, Transition } from "@headlessui/react";
 import {
   DocumentTextIcon,
@@ -19,7 +18,6 @@ import {
   SortingState,
   Table,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
@@ -30,8 +28,6 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { FC, Fragment, useEffect, useState } from "react";
-import { useGetIncomings } from "@/queries/inventory-incoming";
-import InventoryTable from "@/components/InventoryTable";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {

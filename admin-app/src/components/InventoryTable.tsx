@@ -1,8 +1,4 @@
 import { Table, flexRender } from "@tanstack/react-table";
-import {
-  InventoryProduct,
-  InventoryIncoming,
-} from "@/app/interfaces/inventory";
 import { FC } from "react";
 
 export type InventoryTableProps = {

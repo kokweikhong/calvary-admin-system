@@ -1,5 +1,6 @@
 import SidebarLayout from "@/components/SidebarLayout";
 import { QueryProvider } from "@/context/QueryContext";
+import { inter } from "@/lib/fonts";
 import { Metadata } from "next";
 import "./globals.css";
 
@@ -15,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <html lang="en" className="h-full bg-white">
+      <html lang="en" className={`h-full bg-white ${inter.variable}`}>
         <QueryProvider>
           <body className="h-full">
             <SidebarLayout>{children}</SidebarLayout>
