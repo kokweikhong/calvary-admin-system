@@ -1,6 +1,5 @@
-"use client";
-
 import { InventoryTable, Pagination } from "@/components/InventoryTable";
+import { config } from "@/interfaces/config";
 import { InventoryIncoming } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
 import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
@@ -28,7 +27,6 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { FC, Fragment, useEffect, useState } from "react";
-import { config } from "@/interfaces/config";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -200,7 +198,7 @@ const SearchMultipleColumns = ({ table }: { table: Table<T> }) => {
   );
 };
 
-function DebouncedInput({
+function InTableDebouncedSearchInput({
   value: initialValue,
   onChange,
   debounce = 500,
