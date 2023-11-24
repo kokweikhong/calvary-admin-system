@@ -1,3 +1,11 @@
+"use client";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   InventoryIncoming,
   InventoryOutgoing,
@@ -10,63 +18,244 @@ import {
   ChevronDownIcon,
   ChevronUpDownIcon,
   ChevronUpIcon,
+  ViewColumnsIcon,
 } from "@heroicons/react/24/outline";
-import { Column, Table, flexRender } from "@tanstack/react-table";
-import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  FilterFn,
+  SortingState,
+  Table,
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Dispatch,
+  FC,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  // Store the itemRank info
+  addMeta({
+    itemRank,
+  });
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed;
+};
+
+type InventoryTableProps<T extends object> = {
+  data: T[];
+  columns: ColumnDef<T>[];
+};
+
+const InventoryTable: FC<
+  InventoryTableProps<InventoryProduct | InventoryIncoming | InventoryOutgoing>
+> = ({ data, columns }) => {
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const accessorKeys: { header: string; accessorKey: string }[] = columns.map(
+    (column) => column as any
+  );
+
+  const filterKeys = [
+    { header: "Global", accessorKey: "global" },
+    ...accessorKeys.map((column) => column),
+  ];
+
+  const table = useReactTable({
+    columns: columns,
+    data: data,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      rowSelection,
+    },
+    enableRowSelection: true,
+    enableMultiRowSelection: false,
+    onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
+    globalFilterFn: fuzzyFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    debugTable: false,
+    debugHeaders: false,
+    debugColumns: false,
+  });
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8">
+      <InTablePopover
+        table={table}
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+        rowSelection={rowSelection}
+      />
+      <button onClick={() => setOpenDialog(true)}>a</button>
+      <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="sm:flex sm:items-center">
+          <div className="sm:flex-auto">
+            <InTableSearchWithDropDown
+              table={table}
+              filterKeys={filterKeys}
+              globalFilter={globalFilter}
+              setGlobalFilter={setGlobalFilter}
+            />
+          </div>
+          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <InTableColumnVisibilityMenu table={table} />
+          </div>
+        </div>
+      </div>
+
+      <InTable table={table} />
+
+      <div className="sm:flex sm:items-center mt-4">
+        <div className="sm:flex-auto">
+          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <InTablePagination table={table} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InventoryTable;
 
 type InTableProps = {
-  children: ReactNode;
-  className?: string;
+  table: Table<InventoryProduct | InventoryIncoming | InventoryOutgoing>;
+  children?: ReactNode;
 };
 
-export const InTable: FC<InTableProps> = ({ children, className }) => {
+const InTable: FC<InTableProps> = ({ table, children }) => {
   return (
-    <table className={cn("min-w-full divide-y divide-gray-300", className)}>
-      {children}
-    </table>
+    <div className="mt-8 flow-root">
+      <ScrollArea className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
+        <div className="inline-block min-w-full py-2 align-middle">
+          <table className="min-w-full divide-y divide-gray-300">
+            <InTableHeader table={table} />
+            <InTableBody table={table} />
+          </table>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
   );
 };
 
-export const InTableTh: FC<InTableProps> = ({ children, className }) => {
+const InTableHeader: FC<InTableProps> = ({ table }) => {
   return (
-    <th
-      scope="col"
-      className={cn(
-        "whitespace-nowrap py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0",
-        className
-      )}
-    >
-      {children}
-    </th>
+    <thead>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th
+              key={header.id}
+              scope="col"
+              className="whitespace-nowrap px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              {header.isPlaceholder ? null : (
+                <div
+                  {...{
+                    className: header.column.getCanSort()
+                      ? "cursor-pointer select-none flex justify-between items-center"
+                      : "",
+                    onClick: header.column.getToggleSortingHandler(),
+                  }}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
+                  {!header.column.getIsSorted() && (
+                    <ChevronUpDownIcon className="inline-block w-4 h-4 ml-2" />
+                  )}
+                  {{
+                    asc: (
+                      <ChevronUpIcon className="inline-block w-4 h-4 ml-2" />
+                    ),
+                    desc: (
+                      <ChevronDownIcon className="inline-block w-4 h-4 ml-2" />
+                    ),
+                    both: (
+                      <ChevronUpDownIcon className="inline-block w-4 h-4 ml-2" />
+                    ),
+                  }[header.column.getIsSorted() as string] ?? null}
+                </div>
+              )}
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
   );
 };
 
-export const InTableBody: FC<InTableProps> = ({ children, className }) => {
+const InTableBody: FC<InTableProps> = ({ table }) => {
   return (
-    <tbody className={cn("divide-y divide-gray-200 bg-white", className)}>
-      {children}
+    <tbody className="divide-y divide-gray-200 bg-white">
+      {table.getRowModel().rows.map((row) => (
+        <tr key={row.id}>
+          {row.getVisibleCells().map((cell) => (
+            <td
+              key={cell.id}
+              className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
+          ))}
+        </tr>
+      ))}
     </tbody>
   );
 };
 
-export const InTableTd: FC<InTableProps> = ({ children, className }) => {
-  return (
-    <td
-      className={cn(
-        "whitespace-nowrap py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-0",
-        className
-      )}
-    >
-      {children}
-    </td>
-  );
-};
-
-interface ITable {
-  table: Table<InventoryProduct | InventoryIncoming | InventoryOutgoing>;
-}
-
-export const InTablePagination: FC<ITable> = ({ table }) => {
+const InTablePagination: FC<InTableProps> = ({ table }) => {
   return (
     <nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
       <div className="-mt-px flex w-0 flex-1">
@@ -132,61 +321,74 @@ export const InTablePagination: FC<ITable> = ({ table }) => {
   );
 };
 
-export const InventoryTable: FC<ITable> = ({ table }) => {
+const InTableColumnVisibilityMenu: FC<InTableProps> = ({ table }) => {
   return (
-    <InTable>
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <InTableTh key={header.id}>
-                {header.isPlaceholder ? null : (
-                  <div
-                    {...{
-                      className: header.column.getCanSort()
-                        ? "cursor-pointer select-none flex justify-between items-center"
-                        : "",
-                      onClick: header.column.getToggleSortingHandler(),
-                    }}
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {!header.column.getIsSorted() && (
-                      <ChevronUpDownIcon className="inline-block w-4 h-4 ml-2" />
-                    )}
-                    {{
-                      asc: (
-                        <ChevronUpIcon className="inline-block w-4 h-4 ml-2" />
-                      ),
-                      desc: (
-                        <ChevronDownIcon className="inline-block w-4 h-4 ml-2" />
-                      ),
-                      both: (
-                        <ChevronUpDownIcon className="inline-block w-4 h-4 ml-2" />
-                      ),
-                    }[header.column.getIsSorted() as string] ?? null}
-                  </div>
-                )}
-              </InTableTh>
-            ))}
-          </tr>
-        ))}
-      </thead>
+    <Popover>
+      <PopoverTrigger className="flex items-center bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-gray-100">
+        <span className="sr-only">Open Column Views</span>
+        <ViewColumnsIcon className="h-7 w-7" aria-hidden="true" />
+      </PopoverTrigger>
+      <PopoverContent className="ml-9 sm:mr-9">
+        <fieldset>
+          <legend className="sr-only">Column Visibility</legend>
+          <div className="space-y-2 text-sm">
+            <div className="relative flex items-start">
+              <div className="flex h-6 items-center">
+                <input
+                  {...{
+                    type: "checkbox",
+                    checked: table.getIsAllColumnsVisible(),
+                    onChange: table.getToggleAllColumnsVisibilityHandler(),
+                  }}
+                  id="toggleAll"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                />
+              </div>
+              <div className="ml-3 text-sm leading-6">
+                <label
+                  htmlFor="toggleAll"
+                  className="font-medium text-gray-900"
+                >
+                  Toggle All
+                </label>{" "}
+              </div>
+            </div>
 
-      <InTableBody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <InTableTd key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </InTableTd>
-            ))}
-          </tr>
-        ))}
-      </InTableBody>
-    </InTable>
+            {table.getAllLeafColumns().map((column) => {
+              if (column.columnDef.header === undefined) {
+                return null;
+              }
+              return (
+                <div
+                  key={column.id as string}
+                  className="relative flex items-start"
+                >
+                  <div className="flex h-6 items-center">
+                    <input
+                      {...{
+                        type: "checkbox",
+                        checked: column.getIsVisible(),
+                        onChange: column.getToggleVisibilityHandler(),
+                      }}
+                      id={column.id as string}
+                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm leading-6">
+                    <label
+                      htmlFor={column.id as string}
+                      className="font-medium text-gray-900"
+                    >
+                      {column.columnDef.header as string}
+                    </label>{" "}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </fieldset>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -216,91 +418,121 @@ export function InTableDebouncedInput({
 
   return (
     <input
+      placeholder="Search all columns..."
       {...props}
       className={cn(
-        "block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
+        "block w-full rounded-r-md border-0 pl-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6",
         props.className
       )}
-      placeholder="Search all..."
       value={value}
       onChange={(e) => setValue(e.target.value)}
     />
   );
 }
 
-export function InTableFilter({
-  column,
+type InTableSearchColumnsInputProps = {
+  table: Table<InventoryProduct | InventoryIncoming | InventoryOutgoing>;
+  filterKeys: { header: string; accessorKey: string }[];
+  globalFilter: string;
+  setGlobalFilter: Dispatch<SetStateAction<string>>;
+};
+
+const InTableSearchWithDropDown: FC<InTableSearchColumnsInputProps> = ({
   table,
-}: {
-  column: Column<any, unknown>;
-  table: Table<any>;
-}) {
-  const firstValue = table
-    .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id);
-
-  const columnFilterValue = column.getFilterValue();
-
-  const sortedUniqueValues = useMemo(
-    () =>
-      typeof firstValue === "number"
-        ? []
-        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
-    [column.getFacetedUniqueValues()]
-  );
-
-  return typeof firstValue === "number" ? (
-    <div>
-      <div className="flex space-x-2">
-        <InTableDebouncedInput
-          type="number"
-          min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
-          max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
-          value={(columnFilterValue as [number, number])?.[0] ?? ""}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [value, old?.[1]])
-          }
-          placeholder={`Min ${
-            column.getFacetedMinMaxValues()?.[0]
-              ? `(${column.getFacetedMinMaxValues()?.[0]})`
-              : ""
-          }`}
-          className="w-24 border shadow rounded"
-        />
-        <InTableDebouncedInput
-          type="number"
-          min={Number(column.getFacetedMinMaxValues()?.[0] ?? "")}
-          max={Number(column.getFacetedMinMaxValues()?.[1] ?? "")}
-          value={(columnFilterValue as [number, number])?.[1] ?? ""}
-          onChange={(value) =>
-            column.setFilterValue((old: [number, number]) => [old?.[0], value])
-          }
-          placeholder={`Max ${
-            column.getFacetedMinMaxValues()?.[1]
-              ? `(${column.getFacetedMinMaxValues()?.[1]})`
-              : ""
-          }`}
-          className="w-24 border shadow rounded"
-        />
+  filterKeys,
+  globalFilter,
+  setGlobalFilter,
+}) => {
+  const [searchColumnId, setSearchColumnId] = useState<string>("global");
+  return (
+    <div className="flex mt-2 rounded-md shadow-sm">
+      <div className="inset-y-0 left-0 flex items-center">
+        <label htmlFor="search-key" className="sr-only">
+          Search Key
+        </label>
+        <select
+          id="search-key"
+          name="search-key"
+          className="h-full rounded-l-md rounded-r-none border bg-white py-0 pl-3 pr-7 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+          value={searchColumnId}
+          onChange={(e) => {
+            table.resetColumnFilters();
+            table.resetGlobalFilter();
+            setSearchColumnId(e.target.value);
+          }}
+        >
+          {filterKeys.map((filterKey) => (
+            <option key={filterKey.accessorKey} value={filterKey.accessorKey}>
+              {filterKey.header}
+            </option>
+          ))}
+        </select>
       </div>
-      <div className="h-1" />
+      {searchColumnId === "global" ? (
+        <InTableDebouncedInput
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e as string)}
+        />
+      ) : (
+        <InTableDebouncedInput
+          value={
+            (table.getColumn(searchColumnId)?.getFilterValue() as string) ?? ""
+          }
+          onChange={(e) =>
+            table.getColumn(searchColumnId)?.setFilterValue(e as string)
+          }
+          placeholder={`Search for ${
+            table
+              .getColumn(searchColumnId)
+              ?.columnDef.header?.toString()
+              .toLowerCase() ?? "something"
+          }...`}
+        />
+      )}
     </div>
-  ) : (
-    <>
-      <datalist id={column.id + "list"}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-          <option value={value} key={value} />
-        ))}
-      </datalist>
-      <InTableDebouncedInput
-        type="text"
-        value={(columnFilterValue ?? "") as string}
-        onChange={(value) => column.setFilterValue(value)}
-        placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
-        className="w-36 border shadow rounded"
-        list={column.id + "list"}
-      />
-      <div className="h-1" />
-    </>
   );
-}
+};
+
+type InTablePopoverProps = {
+  table: Table<InventoryProduct | InventoryIncoming | InventoryOutgoing>;
+  openDialog: boolean;
+  setOpenDialog: Dispatch<SetStateAction<boolean>>;
+  rowSelection?: Record<string, boolean>;
+};
+
+const InTablePopover: FC<InTablePopoverProps> = ({
+  table,
+  openDialog,
+  setOpenDialog,
+  rowSelection,
+}) => {
+  console.log(table.getIsSomeRowsSelected() ? table.getSelectedRowModel() : {});
+  return (
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you sure absolutely sure?</DialogTitle>
+          <DialogDescription></DialogDescription>
+          <div>
+            <pre>
+              <code>{JSON.stringify(rowSelection)}</code>
+            </pre>
+          </div>
+          <div>
+            <pre>
+              <code className="text-xs">
+                {JSON.stringify(
+                  table.getIsSomeRowsSelected()
+                    ? table.getSelectedRowModel().flatRows[0].original
+                    : {},
+                  null,
+                  2
+                )}
+              </code>
+            </pre>
+          </div>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+};

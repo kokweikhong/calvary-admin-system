@@ -615,7 +615,7 @@ export const fakeInventoryOutgoings: InventoryOutgoing[] = [
     id: 11,
     incomingId: 5,
     productId: 5,
-    status: "OUTGOING",
+    status: "INCOMING",
     quantity: 10,
     standardQuantity: 10,
     cost: 10,

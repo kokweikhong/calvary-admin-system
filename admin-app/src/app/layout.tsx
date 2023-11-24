@@ -18,7 +18,7 @@ export default function RootLayout({
     <>
       <html lang="en" className={`h-full bg-white ${inter.variable}`}>
         <QueryProvider>
-          <body className="h-full">
+          <body className="h-full font-inter">
             <SidebarLayout>{children}</SidebarLayout>
           </body>
         </QueryProvider>

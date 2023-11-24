@@ -1,85 +1,43 @@
 "use client";
 
-import { Card, CardBody, CardFooter, CardHeader } from "@/components/Card";
-import {
-  SearchableColumnProps,
-  useInventoryTable,
-} from "@/hooks/inventory-table";
-import {
-  InventoryOutgoing,
-  fakeInventoryOutgoings,
-} from "@/interfaces/inventory";
-import { createColumnHelper } from "@tanstack/react-table";
-import { useState } from "react";
-
-const columnHelper = createColumnHelper<InventoryOutgoing>();
+import { Card, CardBody, CardHeader } from "@/components/Card";
+import InventoryTable from "@/components/InventoryTable";
+import { useInventoryOutgoingColumns } from "@/hooks/inventoryColumns";
+import { fakeInventoryOutgoings } from "@/interfaces/inventory";
 
 export default function InventoryOutgoingPage() {
-  const [multipleSearch, setMultipleSearch] = useState(false);
-  const columns = [
-    columnHelper.accessor("id", {
-      header: "ID",
-    }),
-    columnHelper.accessor("status", {
-      header: "Status",
-    }),
-    columnHelper.accessor("refNo", {
-      header: "Ref No",
-    }),
-  ];
+  const columns = useInventoryOutgoingColumns();
 
-  const searchColumns: SearchableColumnProps[] = [
-    {
-      label: "ID",
-      value: "id",
-      placeholder: "Search ID",
-    },
-    {
-      label: "Ref No",
-      value: "refNo",
-      placeholder: "Search Ref No",
-    },
-  ];
-
-  const {
-    InventoryTable,
-    InTablePagination,
-    // InTableSearchColumnsInput,
-    InTableGlobalSearch,
-    InTableFilter,
-  } = useInventoryTable({
-    columns: columns as any,
-    data: fakeInventoryOutgoings,
-    searchableColumns: searchColumns,
-  });
-  // const { InTablePagination } = useInventoryTableComponents({
-  //   table: table,
-  // });
   return (
     <div>
-      <div>
-        <Card>
-          <CardHeader>
-            <h2>Outgoing</h2>
-            <div>
-              <InTableGlobalSearch />
+      <Card>
+        <CardHeader>
+          <div className="sm:flex sm:items-center">
+            <div className="sm:flex-auto">
+              <h1 className="text-base font-semibold leading-6 text-gray-900">
+                Inventory Outgoings
+              </h1>
+              <p className="mt-2 text-sm text-gray-700">
+                List of inventory outgoings
+              </p>
             </div>
-            <button onClick={() => setMultipleSearch(!multipleSearch)}>
-              Set
-            </button>
-            <div>{/* <InTableSearchColumnsInput /> */}</div>
-            <div>{InTableFilter("id")}</div>
-          </CardHeader>
-          <CardBody>
-            <InventoryTable />
-          </CardBody>
-          <CardFooter>
-            <div className="">
-              <InTablePagination />
+            <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+              <button
+                type="button"
+                className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                New Inventory Outgoing
+              </button>
             </div>
-          </CardFooter>
-        </Card>
-      </div>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <InventoryTable
+            data={fakeInventoryOutgoings}
+            columns={columns as any}
+          />
+        </CardBody>
+      </Card>
     </div>
   );
 }
