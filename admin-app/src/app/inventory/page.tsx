@@ -110,7 +110,7 @@ export default function InventoryPage() {
                           }}
                           src={product.thumbnail}
                           alt={`${product.name} product shot`}
-                          sizes="100vw"
+                          sizes="(max-width: 640px) 100vw, 640px"
                           width={500}
                           height={500}
                           priority={true}

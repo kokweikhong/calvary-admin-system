@@ -4,68 +4,233 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { config } from "@/interfaces/config";
-import { InventoryIncoming, InventoryOutgoing } from "@/interfaces/inventory";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { InventoryIncoming, InventoryOutgoing, InventoryProduct } from "@/interfaces/inventory";
+import { DocumentTextIcon, EllipsisVerticalIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import Image from "next/image";
+
+const columnHelperInProduct = createColumnHelper<InventoryProduct>();
+
+export const useInventoryProductColumns = () =>
+  useMemo(() => [
+    columnHelperInProduct.display({
+      id: "actions",
+      header: "",
+      cell: (info) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <a
+                href="#"
+                className={cn(
+                  'text-gray-700',
+                  'group flex items-center px-4 py-2 text-sm'
+                )}
+              >
+                <PencilSquareIcon
+                  className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                  aria-hidden="true"
+                />
+                Edit
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <button
+                className={cn(
+                  'text-gray-700',
+                  'group flex items-center px-4 py-2 text-sm'
+                )}
+              >
+                <TrashIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                Delete
+              </button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    }),
+    columnHelperInProduct.accessor("thumbnail", {
+      header: "Doc",
+      cell: (info) => (
+        <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+          <Image
+            src={`${config.MainServiceURL}/${info.row.original.thumbnail}`}
+            alt="Profile Image"
+            sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
+            width={500}
+            height={500}
+            priority={true}
+            className="h-full w-full object-cover object-center"
+          />
+        </div>
+      ),
+    }),
+    columnHelperInProduct.accessor("code", {
+      header: "Code",
+      cell: (info) => (
+
+        <span
+          onClick={() => {
+            info.row.toggleSelected(!info.row.getIsSelected());
+          }}
+          className={cn(
+            // "inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-200",
+            "cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          )}
+        >
+          {info.row.getValue(info.column.id)}
+        </span>
+      )
+    }),
+    columnHelperInProduct.accessor("name", {
+      header: "Name",
+    }),
+    columnHelperInProduct.accessor("brand", {
+      header: "Brand",
+    }),
+    columnHelperInProduct.accessor("supplier", {
+      header: "Supplier",
+    }),
+    columnHelperInProduct.accessor("standardUnit", {
+      header: "Std.Unit",
+    }),
+    columnHelperInProduct.accessor("isExist", {
+      header: "Exist",
+      cell: (info) => (
+        <span
+          className={cn(
+            "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
+            info.row.original.isExist
+              ? "bg-green-50 text-green-700 ring-green-600/20"
+              : "bg-red-50 text-red-700 ring-red-600/20"
+          )}
+        >
+          {info.row.original.isExist ? "Active" : "Inactive"}
+        </span>
+      ),
+    }),
+    columnHelperInProduct.accessor("remarks", {
+      header: "Remarks",
+    }),
+  ], []);
 
 const columnHelperInOutgoing = createColumnHelper<InventoryOutgoing>();
 
 export const useInventoryOutgoingColumns = () =>
-  useMemo(
-    () => [
-      columnHelperInOutgoing.accessor("id", {
-        header: "ID",
-        cell: (info) => (
-          <button
-            onClick={() => {
-              info.row.toggleSelected(!info.row.getIsSelected());
-            }}
-          >
-            {info.row.original.id} {info.row.getIsSelected() ? "true" : "false"}
-          </button>
-        ),
-      }),
-      columnHelperInOutgoing.accessor("productCode", {
-        header: "Product Code",
-      }),
-      columnHelperInOutgoing.accessor("productName", {
-        header: "Product Name",
-      }),
-      columnHelperInOutgoing.accessor("status", {
-        header: "Status",
-      }),
-      columnHelperInOutgoing.accessor("quantity", {
-        header: "Qty",
-      }),
-      columnHelperInOutgoing.accessor("standardQuantity", {
-        header: "Std.Qty",
-      }),
-      columnHelperInOutgoing.accessor("standardUnit", {
-        header: "Std.Unit",
-      }),
-      columnHelperInOutgoing.accessor("cost", {
-        header: "Cost",
-      }),
-      columnHelperInOutgoing.accessor("refNo", {
-        header: "Ref No",
-      }),
-      columnHelperInOutgoing.accessor("refDoc", {
-        header: "Ref Doc",
-        cell: (info) => (
-          <a
-            target="_blank"
-            href={`${config.MainServiceURL}/${info.row.original.refDoc}`}
-            className="hover:text-indigo-500"
-          >
-            <DocumentTextIcon className="w-4 h-4" />
-          </a>
-        ),
-      }),
-      columnHelperInOutgoing.accessor("remarks", {
-        header: "Remarks",
-      }),
-    ],
+  useMemo(() => [
+    columnHelperInOutgoing.display({
+      id: "actions",
+      header: "",
+      cell: (info) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <a
+                href="#"
+                className={cn(
+                  'text-gray-700',
+                  'group flex items-center px-4 py-2 text-sm'
+                )}
+              >
+                <PencilSquareIcon
+                  className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                  aria-hidden="true"
+                />
+                Edit
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <button
+                className={cn(
+                  'text-gray-700',
+                  'group flex items-center px-4 py-2 text-sm'
+                )}
+              >
+                <TrashIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                Delete
+              </button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    }),
+    columnHelperInOutgoing.accessor("productCode", {
+      header: "Product Code",
+      cell: (info) => (
+        <span
+          onClick={() => {
+            info.row.toggleSelected(!info.row.getIsSelected());
+          }}
+          className={cn(
+            "inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-200",
+            "cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          )}
+        >
+          <svg className="h-1.5 w-1.5 fill-indigo-500" viewBox="0 0 6 6" aria-hidden="true">
+            <circle cx={3} cy={3} r={3} />
+          </svg>
+          {info.row.original.productCode}
+        </span>
+      )
+
+    }),
+    columnHelperInOutgoing.accessor("productName", {
+      header: "Product Name",
+    }),
+    columnHelperInOutgoing.accessor("status", {
+      header: "Status",
+    }),
+    columnHelperInOutgoing.accessor("quantity", {
+      header: "Qty",
+    }),
+    columnHelperInOutgoing.accessor("standardQuantity", {
+      header: "Std.Qty",
+    }),
+    columnHelperInOutgoing.accessor("standardUnit", {
+      header: "Std.Unit",
+    }),
+    columnHelperInOutgoing.accessor("cost", {
+      header: "Cost",
+    }),
+    columnHelperInOutgoing.accessor("refNo", {
+      header: "Ref No",
+    }),
+    columnHelperInOutgoing.accessor("refDoc", {
+      header: "Ref Doc",
+      cell: (info) => (
+        <a
+          target="_blank"
+          href={`${config.MainServiceURL}/${info.row.original.refDoc}`}
+          className="hover:text-indigo-500"
+        >
+          <DocumentTextIcon className="w-4 h-4" />
+        </a>
+      ),
+    }),
+    columnHelperInOutgoing.accessor("remarks", {
+      header: "Remarks",
+    }),
+  ],
     []
   );
 

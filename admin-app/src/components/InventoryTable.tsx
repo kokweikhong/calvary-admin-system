@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import {
+  Cell,
   ColumnDef,
   ColumnFiltersState,
   FilterFn,
@@ -39,6 +40,7 @@ import {
 import {
   Dispatch,
   FC,
+  Fragment,
   ReactNode,
   SetStateAction,
   useEffect,
@@ -50,7 +52,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "@/components/ui/dialog";
+import Image from "next/image";
+import { isImageExt } from "@/lib/utils";
+import { config } from "@/interfaces/config";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -97,6 +102,8 @@ const InventoryTable: FC<
     ...accessorKeys.map((column) => column),
   ];
 
+  console.log(filterKeys);
+
   const table = useReactTable({
     columns: columns,
     data: data,
@@ -127,21 +134,25 @@ const InventoryTable: FC<
     debugColumns: false,
   });
 
+  useEffect(() => {
+    if (!table.getIsSomeRowsSelected()) return;
+    setOpenDialog(true);
+  }, [rowSelection]);
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <InTablePopover
+      <InTableDialog
         table={table}
         openDialog={openDialog}
         setOpenDialog={setOpenDialog}
         rowSelection={rowSelection}
       />
-      <button onClick={() => setOpenDialog(true)}>a</button>
       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
             <InTableSearchWithDropDown
               table={table}
-              filterKeys={filterKeys}
+              filterKeys={filterKeys as any}
               globalFilter={globalFilter}
               setGlobalFilter={setGlobalFilter}
             />
@@ -212,7 +223,7 @@ const InTableHeader: FC<InTableProps> = ({ table }) => {
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-                  {!header.column.getIsSorted() && (
+                  {!header.column.getIsSorted() && header.column.columnDef.header !== "" && (
                     <ChevronUpDownIcon className="inline-block w-4 h-4 ml-2" />
                   )}
                   {{
@@ -355,7 +366,7 @@ const InTableColumnVisibilityMenu: FC<InTableProps> = ({ table }) => {
             </div>
 
             {table.getAllLeafColumns().map((column) => {
-              if (column.columnDef.header === undefined) {
+              if (column.columnDef.header === "") {
                 return null;
               }
               return (
@@ -461,8 +472,8 @@ const InTableSearchWithDropDown: FC<InTableSearchColumnsInputProps> = ({
             setSearchColumnId(e.target.value);
           }}
         >
-          {filterKeys.map((filterKey) => (
-            <option key={filterKey.accessorKey} value={filterKey.accessorKey}>
+          {filterKeys.map((filterKey, index) => (
+            <option key={index} value={filterKey.accessorKey}>
               {filterKey.header}
             </option>
           ))}
@@ -481,57 +492,71 @@ const InTableSearchWithDropDown: FC<InTableSearchColumnsInputProps> = ({
           onChange={(e) =>
             table.getColumn(searchColumnId)?.setFilterValue(e as string)
           }
-          placeholder={`Search for ${
-            table
-              .getColumn(searchColumnId)
-              ?.columnDef.header?.toString()
-              .toLowerCase() ?? "something"
-          }...`}
+          placeholder={`Search for ${table
+            .getColumn(searchColumnId)
+            ?.columnDef.header?.toString()
+            .toLowerCase() ?? "something"
+            }...`}
         />
       )}
     </div>
   );
 };
 
-type InTablePopoverProps = {
+type InTableDialogProps = {
   table: Table<InventoryProduct | InventoryIncoming | InventoryOutgoing>;
   openDialog: boolean;
   setOpenDialog: Dispatch<SetStateAction<boolean>>;
   rowSelection?: Record<string, boolean>;
 };
 
-const InTablePopover: FC<InTablePopoverProps> = ({
+const InTableDialog: FC<InTableDialogProps> = ({
   table,
   openDialog,
   setOpenDialog,
   rowSelection,
 }) => {
-  console.log(table.getIsSomeRowsSelected() ? table.getSelectedRowModel() : {});
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you sure absolutely sure?</DialogTitle>
-          <DialogDescription></DialogDescription>
-          <div>
-            <pre>
-              <code>{JSON.stringify(rowSelection)}</code>
-            </pre>
-          </div>
-          <div>
-            <pre>
-              <code className="text-xs">
-                {JSON.stringify(
-                  table.getIsSomeRowsSelected()
-                    ? table.getSelectedRowModel().flatRows[0].original
-                    : {},
-                  null,
-                  2
-                )}
-              </code>
-            </pre>
-          </div>
-        </DialogHeader>
+        <ScrollArea className="max-h-96">
+          {table.getIsSomeRowsSelected() ? (
+            <Fragment>
+              {table.getSelectedRowModel().rowsById[0]?.getValue("thumbnail") ? (
+                <div className="flex justify-center">
+                  <Image
+                    src={
+                      `${config.MainServiceURL}/${table.getSelectedRowModel().rowsById[0]?.getValue("thumbnail")}`
+                    }
+                    alt="Product Image"
+                    width={500}
+                    height={500}
+                    sizes="(max-width: 640px) 100vw, 500px"
+                    priority
+                    className="rounded-md w-auto h-auto object-contain"
+                  />
+                </div>
+              ) : null}
+              <div className="mt-6 border-t border-gray-100">
+                <dl className="divide-y divide-gray-100">
+                  {table.getSelectedRowModel().flatRows[0].getAllCells().map((cell) => (
+                    cell.column.columnDef.header === "" ? null :
+                      <div key={cell.id} className="px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+                        <dt className="text-sm font-medium leading-6 text-gray-900">
+                          {cell.column.columnDef.header?.toString() ?? "N/A"}
+                        </dt>
+                        <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
+                          {cell.row.getValue(cell.column.id) ?? "N/A"}
+                        </dd>
+                      </div>
+                  ))}
+                </dl>
+              </div>
+            </Fragment>
+          ) : (
+            <div>Nothing selected</div>
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
