@@ -2,11 +2,22 @@
 
 import { Card, CardBody, CardHeader } from "@/components/Card";
 import InventoryTable from "@/components/InventoryTable";
+import { useGetInventoryOutgoings } from "@/queries/inventory-outgoing";
 import { useInventoryOutgoingColumns } from "@/hooks/inventoryColumns";
-import { fakeInventoryOutgoings } from "@/interfaces/inventory";
+// import { fakeInventoryOutgoings } from "@/interfaces/inventory";
 
 export default function InventoryOutgoingPage() {
+  const outgoings = useGetInventoryOutgoings();
+
   const columns = useInventoryOutgoingColumns();
+
+  if (outgoings.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (outgoings.isError) {
+    return <div>Error</div>;
+  }
 
   return (
     <div>
@@ -33,7 +44,7 @@ export default function InventoryOutgoingPage() {
         </CardHeader>
         <CardBody>
           <InventoryTable
-            data={fakeInventoryOutgoings}
+            data={outgoings.data || []}
             columns={columns as any}
           />
         </CardBody>

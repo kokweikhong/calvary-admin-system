@@ -2,7 +2,7 @@ import { InventoryOutgoing } from "@/interfaces/inventory";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-const inOutgoingURL = `${process.env.REACT_APP_API_URL}/api/v1/inventory/outgoings`;
+const inOutgoingURL = `${process.env.NEXT_PUBLIC_MAIN_SERVICE_URL}/api/v1/inventory/outgoings`;
 
 export const useGetInventoryOutgoings = () => {
   return useQuery("outgoings", async () => {

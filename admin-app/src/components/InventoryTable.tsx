@@ -19,6 +19,7 @@ import {
   ChevronUpDownIcon,
   ChevronUpIcon,
   ViewColumnsIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import {
@@ -516,17 +517,38 @@ const InTableDialog: FC<InTableDialogProps> = ({
   setOpenDialog,
   rowSelection,
 }) => {
+
+  let imgSrc: string | null = null;
+  if (rowSelection !== undefined) {
+    const row = table.getRowModel().rows.find(row => rowSelection[row.id])
+    if (row) {
+      const cells = row.getAllCells()
+      const imgCell = cells.find(cell => {
+        console.log(cell.column.id, String(cell.row.getValue(cell.column.id)));
+        return isImageExt(String(cell.row.getValue(cell.column.id)))
+      })
+
+      if (imgCell) {
+        imgSrc = imgCell.row.getValue(imgCell.column.id)
+      }
+    }
+  }
+
+
+
+  console.log(imgSrc);
+
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent>
         <ScrollArea className="max-h-96">
           {table.getIsSomeRowsSelected() ? (
             <Fragment>
-              {table.getSelectedRowModel().rowsById[0]?.getValue("thumbnail") ? (
+              {imgSrc ? (
                 <div className="flex justify-center">
                   <Image
                     src={
-                      `${config.MainServiceURL}/${table.getSelectedRowModel().rowsById[0]?.getValue("thumbnail")}`
+                      `${config.MainServiceURL}/${imgSrc}`
                     }
                     alt="Product Image"
                     width={500}
@@ -546,7 +568,16 @@ const InTableDialog: FC<InTableDialogProps> = ({
                           {cell.column.columnDef.header?.toString() ?? "N/A"}
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
-                          {cell.row.getValue(cell.column.id) ?? "N/A"}
+                          {cell.column.id === "refDoc" || cell.column.id === "thumbnail" ? (
+                            <a
+                              href={`${config.MainServiceURL}/${cell.row.getValue(cell.column.id)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="ml-2 text-indigo-600 hover:text-indigo-500"
+                            >
+                              <ArrowDownTrayIcon className="inline-block w-4 h-4" />
+                            </a>
+                          ) : cell.row.getValue(cell.column.id)}
                         </dd>
                       </div>
                   ))}

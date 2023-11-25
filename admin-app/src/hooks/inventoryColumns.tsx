@@ -65,7 +65,7 @@ export const useInventoryProductColumns = () =>
       ),
     }),
     columnHelperInProduct.accessor("thumbnail", {
-      header: "Doc",
+      header: "Thumbnail",
       cell: (info) => (
         <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
           <Image
@@ -75,27 +75,16 @@ export const useInventoryProductColumns = () =>
             width={500}
             height={500}
             priority={true}
-            className="h-full w-full object-cover object-center"
+            className="h-full w-full object-cover object-center cursor-pointer group-hover:opacity-75"
+            onClick={() => {
+              info.row.toggleSelected(!info.row.getIsSelected());
+            }}
           />
         </div>
       ),
     }),
     columnHelperInProduct.accessor("code", {
       header: "Code",
-      cell: (info) => (
-
-        <span
-          onClick={() => {
-            info.row.toggleSelected(!info.row.getIsSelected());
-          }}
-          className={cn(
-            // "inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-200",
-            "cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          )}
-        >
-          {info.row.getValue(info.column.id)}
-        </span>
-      )
     }),
     columnHelperInProduct.accessor("name", {
       header: "Name",
@@ -236,7 +225,7 @@ export const useInventoryOutgoingColumns = () =>
 
 const columnHelperInIncoming = createColumnHelper<InventoryIncoming>();
 
-export const InventoryIncomingColumns = () =>
+export const useInventoryIncomingColumns = () =>
   useMemo(
     () => [
       columnHelperInIncoming.display({
