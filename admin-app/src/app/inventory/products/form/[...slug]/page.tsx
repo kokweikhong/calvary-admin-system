@@ -9,9 +9,11 @@ import {
 } from "@/queries/inventory-products";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -39,6 +41,7 @@ export default function InventoryProductFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const router = useRouter();
   const formType = params.slug[0];
   const productId = params.slug.length > 1 ? params.slug[1] : "";
   const product = useGetInventoryProduct(productId);
@@ -77,18 +80,24 @@ export default function InventoryProductFormPage({
         },
       });
     }
+
     if (formType === "create") {
-      Swal.fire({
+      await Swal.fire({
         title: "Are you sure want to create this product?",
         text: "You will not be able to recover this product!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Yes, create it!",
         cancelButtonText: "No, keep it.",
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          createProduct.mutate(data);
-          Swal.fire("Created!", "Your product has been created.", "success");
+          try {
+            await createProduct.mutateAsync(data);
+            await Swal.fire("Created!", "Your product has been created.", "success");
+            router.push("/inventory/products");
+          } catch (error) {
+            Swal.fire("Error!", `Create product failed. ${error}`, "error");
+          }
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire("Cancelled", "Your product is safe :)", "error");
         }
@@ -101,16 +110,22 @@ export default function InventoryProductFormPage({
         showCancelButton: true,
         confirmButtonText: "Yes, update it!",
         cancelButtonText: "No, keep it.",
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          updateProduct.mutate(data);
-          Swal.fire("Updated!", "Your product has been updated.", "success");
+          try {
+            await updateProduct.mutateAsync(data);
+            await Swal.fire("Updated!", "Your product has been updated.", "success");
+            router.push("/inventory/products");
+          } catch (error) {
+            Swal.fire("Error!", `Update product failed. ${error}`, "error");
+          }
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire("Cancelled", "Your product is safe :)", "error");
         }
       });
     }
   };
+
 
   return (
     <div>

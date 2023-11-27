@@ -47,9 +47,9 @@ const navigations: NavigatinItem[] = [
       { name: "Customer Success", href: "#", current: false },
     ],
   },
-  { name: "Upcoming", href: "#", icon: CalendarIcon, current: false },
-  { name: "Upcoming", href: "#", icon: DocumentDuplicateIcon, current: false },
-  { name: "Upcoming", href: "#", icon: ChartPieIcon, current: false },
+  { name: "Upcoming1", href: "#", icon: CalendarIcon, current: false },
+  { name: "Upcoming2", href: "#", icon: DocumentDuplicateIcon, current: false },
+  { name: "Upcoming3", href: "#", icon: ChartPieIcon, current: false },
 ];
 
 function classNames(...classes: string[]) {

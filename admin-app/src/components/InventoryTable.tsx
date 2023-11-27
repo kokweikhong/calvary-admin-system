@@ -569,14 +569,18 @@ const InTableDialog: FC<InTableDialogProps> = ({
                         </dt>
                         <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">
                           {cell.column.id === "refDoc" || cell.column.id === "thumbnail" ? (
-                            <a
-                              href={`${config.MainServiceURL}/${cell.row.getValue(cell.column.id)}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="ml-2 text-indigo-600 hover:text-indigo-500"
-                            >
-                              <ArrowDownTrayIcon className="inline-block w-4 h-4" />
-                            </a>
+                            cell.row.getValue(cell.column.id) === "" ? (
+                              "N/A"
+                            ) : (
+                              <a
+                                href={`${config.MainServiceURL}/${cell.row.getValue(cell.column.id)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="ml-2 text-indigo-600 hover:text-indigo-500"
+                              >
+                                <ArrowDownTrayIcon className="inline-block w-4 h-4" />
+                              </a>
+                            )
                           ) : cell.row.getValue(cell.column.id)}
                         </dd>
                       </div>

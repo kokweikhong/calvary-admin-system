@@ -6,6 +6,7 @@ import { RankingInfo } from "@tanstack/match-sorter-utils";
 import { FilterFn } from "@tanstack/react-table";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import Swal from "sweetalert2";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -42,8 +43,12 @@ export const useCreateInventoryProduct = () => {
   const queryClient = useQueryClient();
   return useMutation(
     async (data: InventoryProduct) => {
-      const response = await axios.post(inProductsURL, data);
-      return response.data;
+      await axios.post(inProductsURL, data).then((response) => {
+        return response.data;
+      }
+      ).catch((error) => {
+        throw new Error(`${error.response.data.message}`);
+      });
     },
     {
       onSuccess: () => {
@@ -57,8 +62,11 @@ export const useUpdateInventoryProduct = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation(
     async (data: InventoryProduct) => {
-      const response = await axios.put(`${inProductsURL}/${id}`, data);
-      return response.data;
+      await axios.put(`${inProductsURL}/${id}`, data).then((response) => {
+        return response.data;
+      }).catch((error) => {
+        throw new Error(`${error.response.data.message}`);
+      });
     },
     {
       onSuccess: () => {

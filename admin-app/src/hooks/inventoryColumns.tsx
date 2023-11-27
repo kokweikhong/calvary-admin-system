@@ -27,13 +27,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import Swal from "sweetalert2";
+import { PhotoIcon } from "@heroicons/react/24/outline";
+import { isImageExt } from "@/lib/utils";
 
 const columnHelperInProduct = createColumnHelper<InventoryProduct>();
 
 export const useInventoryProductColumns = () => {
   const deleteInventoryProduct = useDeleteInventoryProduct();
 
-  function handleDelete(id: number) {
+  async function handleDelete(id: number) {
     Swal.fire({
       title: "Are you sure?",
       text: "You will not be able to recover this product!",
@@ -43,9 +45,26 @@ export const useInventoryProductColumns = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        deleteInventoryProduct.mutate(id.toString());
+        try {
+          await deleteInventoryProduct.mutateAsync(id.toString());
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your product has been deleted.",
+            icon: "success",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#10B981",
+          });
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong!",
+            icon: "error",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#EF4444",
+          });
+        }
       }
     });
   }
@@ -100,20 +119,32 @@ export const useInventoryProductColumns = () => {
       columnHelperInProduct.accessor("thumbnail", {
         header: "Thumbnail",
         cell: (info) => (
-          <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
-            <Image
-              src={`${config.MainServiceURL}/${info.row.original.thumbnail}`}
-              alt="Profile Image"
-              sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
-              width={500}
-              height={500}
-              priority={true}
-              className="h-full w-full object-cover object-center cursor-pointer group-hover:opacity-75"
-              onClick={() => {
-                info.row.toggleSelected(!info.row.getIsSelected());
-              }}
-            />
-          </div>
+          isImageExt(info.row.original.thumbnail) ? (
+
+            <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+              <Image
+                src={`${config.MainServiceURL}/${info.row.original.thumbnail}`}
+                alt="Profile Image"
+                sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
+                width={500}
+                height={500}
+                priority={true}
+                className="h-full w-full object-cover object-center cursor-pointer group-hover:opacity-75"
+                onClick={() => {
+                  info.row.toggleSelected(!info.row.getIsSelected());
+                }}
+              />
+            </div>
+          ) : (
+            <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
+              <PhotoIcon
+                className="h-full w-full object-cover object-center cursor-pointer group-hover:opacity-75"
+                onClick={() => {
+                  info.row.toggleSelected(!info.row.getIsSelected());
+                }}
+              />
+            </div>
+          )
         ),
       }),
       columnHelperInProduct.accessor("code", {
@@ -169,9 +200,26 @@ export const useInventoryIncomingColumns = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        deleteIncoming.mutate(id.toString());
+        try {
+          await deleteIncoming.mutateAsync(id.toString());
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your incoming has been deleted.",
+            icon: "success",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#10B981",
+          });
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong!",
+            icon: "error",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#EF4444",
+          });
+        }
       }
     });
   }

@@ -12,10 +12,12 @@ import {
   useGetInventoryIncoming,
   useUpdateInventoryIncoming,
 } from "@/queries/inventory-incoming";
+import { useGetInventoryProducts } from "@/queries/inventory-products";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 const countries: { label: string; value: string }[] = [
   { label: "Malaysia", value: "malaysia" },
@@ -57,12 +59,14 @@ export default function InventoryIncomingFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const router = useRouter();
   const formType = params.slug[0];
   const incomingId = params.slug.length > 1 ? params.slug[1] : "";
   const incoming = useGetInventoryIncoming(incomingId);
-  const products = fakeInventoryProducts;
+  // const products = fakeInventoryProducts;
   const createIncoming = useCreateInventoryIncoming();
   const updateIncoming = useUpdateInventoryIncoming(incomingId);
+  const products = useGetInventoryProducts();
   const uploadFile = useUploadFile();
 
   const [refDoc, setRefDoc] = React.useState<File | null>(null);
@@ -106,24 +110,8 @@ export default function InventoryIncomingFormPage({
         showCancelButton: true,
         confirmButtonText: "Yes, create it!",
         cancelButtonText: "No, cancel!",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-          cancelButton: "bg-gray-300",
-        },
-        buttonsStyling: false,
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await createIncoming.mutateAsync(data);
-          form.reset(emptyInventoryIncoming);
-          Swal.fire({
-            title: "Created!",
-            text: "Your incoming has been created.",
-            icon: "success",
-            customClass: {
-              confirmButton: "bg-indigo-600",
-            },
-            buttonsStyling: false,
-          });
         }
       });
     } else if (formType === "update") {
@@ -134,28 +122,38 @@ export default function InventoryIncomingFormPage({
         showCancelButton: true,
         confirmButtonText: "Yes, update it!",
         cancelButtonText: "No, cancel!",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-          cancelButton: "bg-gray-300",
-        },
-        buttonsStyling: false,
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await updateIncoming.mutateAsync(data);
-          form.reset(emptyInventoryIncoming);
+          try {
+            await updateIncoming.mutateAsync(data);
+            Swal.fire({
+              title: "Updated!",
+              text: "Your incoming has been updated.",
+              icon: "success",
+            })
+            router.push("/inventory/incomings");
+          } catch (error) {
+            Swal.fire({
+              title: "Error!",
+              text: `Cannot update incoming: ${error}`,
+              icon: "error",
+            })
+          }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire({
-            title: "Updated!",
-            text: "Your incoming has been updated.",
-            icon: "success",
-            customClass: {
-              confirmButton: "bg-indigo-600",
-            },
-            buttonsStyling: false,
+            title: "Cancelled!",
+            text: "Your incoming is not updated.",
+            icon: "error",
           });
         }
       });
     }
-  };
+  }
+
+  if (products.isLoading) {
+    return <div>Loading...</div>;
+  }
+
 
   return (
     <div>
@@ -195,14 +193,22 @@ export default function InventoryIncomingFormPage({
                           field.onChange(parseInt(e.target.value));
                         }}
                       >
-                        <option value="" disabled>
-                          Please select a product
-                        </option>
-                        {products.map((product) => (
-                          <option key={product.code} value={product.id}>
-                            {product.code} | {product.name}
+                        {products.data && products.data.length > 0 ? (
+                          <>
+                            <option value="" disabled>
+                              Please select a product
+                            </option>
+                            {products.data.map((product) => (
+                              <option key={product.code} value={product.id}>
+                                {product.code} | {product.name}
+                              </option>
+                            ))}
+                          </>
+                        ) : (
+                          <option value="" disabled>
+                            No product found
                           </option>
-                        ))}
+                        )}
                       </select>
                     </div>
                   </div>
@@ -263,6 +269,9 @@ export default function InventoryIncomingFormPage({
                         id="standardQuantity"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                       <p className="mt-3 text-sm leading-6 text-gray-600">
                         Std unit from product:{" "}
@@ -270,7 +279,7 @@ export default function InventoryIncomingFormPage({
                           <FlatBadge
                             color="blue"
                             label={
-                              products.find(
+                              products.data?.find(
                                 (p) => p.id === form.watch("productId")
                               )?.standardUnit ?? "N/A"
                             }
@@ -302,6 +311,9 @@ export default function InventoryIncomingFormPage({
                         id="quantiy"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                       <p className="mt-3 text-sm leading-6 text-gray-600">
                         {form.watch("length") > 0 && (
@@ -391,6 +403,9 @@ export default function InventoryIncomingFormPage({
                         id="length"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>
@@ -417,6 +432,9 @@ export default function InventoryIncomingFormPage({
                         id="width"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>
@@ -443,6 +461,9 @@ export default function InventoryIncomingFormPage({
                         id="width"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>
@@ -469,6 +490,9 @@ export default function InventoryIncomingFormPage({
                         id="cost"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>

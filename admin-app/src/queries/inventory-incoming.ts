@@ -23,8 +23,11 @@ export const useCreateInventoryIncoming = () => {
   const queryClient = useQueryClient();
   return useMutation(
     async (incoming: InventoryIncoming) => {
-      const { data } = await axios.post(inIncomingURL, incoming);
-      return data;
+      await axios.post(inIncomingURL, incoming).then((response) => {
+        return response.data;
+      }).catch((error) => {
+        throw new Error(`${error.response.data.message}`);
+      });
     },
     {
       onSuccess: () => {

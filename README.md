@@ -1,5 +1,8 @@
 ### To Do
 
-- [ ] add pagination to table
-- [ ] add sorting fn to table
-- [ ] incoming and outgoing form
+- [X] add pagination to table
+- [X] add sorting fn to table
+- [x] incoming and outgoing form
+- [ ] outgoing CRUD from frontend
+- [ ] backend user CRUD
+- [ ] frontend user CRUD

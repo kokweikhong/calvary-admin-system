@@ -5,6 +5,7 @@ import InventoryTable from "@/components/InventoryTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventoryProductColumns } from "@/hooks/inventoryColumns";
 import { useGetInventoryProducts } from "@/queries/inventory-products";
+import Link from "next/link";
 
 export default function InventoryProductsPage() {
   const products = useGetInventoryProducts();
@@ -36,12 +37,12 @@ export default function InventoryProductsPage() {
               </p>
             </div>
             <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-              <button
-                type="button"
+              <Link
+                href="/inventory/products/form/create"
                 className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                New Inventory Outgoing
-              </button>
+                New Inventory Product 
+              </Link>
             </div>
           </div>
         </CardHeader>
