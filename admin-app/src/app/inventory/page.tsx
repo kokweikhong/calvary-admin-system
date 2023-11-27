@@ -1,5 +1,8 @@
 "use client";
 
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { config } from "@/interfaces/config";
+import { useGetInventoryProductSummary } from "@/queries/inventory-products";
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
@@ -10,16 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  InventoryProduct,
-  fakeInventoryProducts,
-  InventoryProductSummary,
-} from "../../interfaces/inventory";
-import {
-  useGetInventoryProducts,
-  useGetInventoryProductSummary,
-} from "@/queries/inventory-products";
-import { config } from "@/interfaces/config";
+import { InventoryProductSummary } from "../../interfaces/inventory";
 
 export default function InventoryPage() {
   // const products: InventoryProduct[] = fakeInventoryProducts;
@@ -44,8 +38,8 @@ export default function InventoryPage() {
     setFilteredProducts(products);
   }, [products]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {`${error}`}</div>;
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) throw new Error(`Error while fetching products: ${error}`);
 
   function handleFilter(e: React.ChangeEvent<HTMLInputElement>) {
     if (!products) return;

@@ -1,10 +1,10 @@
 "use client";
 
-
 import { Card, CardBody, CardHeader } from "@/components/Card";
 import InventoryTable from "@/components/InventoryTable";
-import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventoryIncomingColumns } from "@/hooks/inventoryColumns";
+import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
 
 export default function InventoryIncomingPage() {
   const incomings = useGetInventoryIncomings();
@@ -12,11 +12,11 @@ export default function InventoryIncomingPage() {
   const columns = useInventoryIncomingColumns();
 
   if (incomings.isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner label="incomings data" />;
   }
 
   if (incomings.isError) {
-    return <div>Error</div>;
+    throw new Error(`Error while fetching incomings: ${incomings.error}`);
   }
 
   return (
@@ -52,5 +52,3 @@ export default function InventoryIncomingPage() {
     </div>
   );
 }
-
-

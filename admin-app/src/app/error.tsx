@@ -1,5 +1,6 @@
 "use client"; // Error components must be Client Components
 
+import { XCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -24,7 +25,20 @@ export default function Error({
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
           Page not found
         </h1>
-        <p className="mt-6 text-base leading-7 text-gray-600">{`${error}`}</p>
+        {/* <p className="mt-6 text-base leading-7 text-gray-600">{`${error}`}</p> */}
+        <div className="border-l-4 border-red-400 bg-red-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{`${error}`}</p>
+            </div>
+          </div>
+        </div>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <Link
             href="/"
