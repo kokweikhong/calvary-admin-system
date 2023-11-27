@@ -11,6 +11,7 @@ import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import Swal from "sweetalert2";
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -44,9 +45,7 @@ export default function InventoryProductFormPage({
   const createProduct = useCreateInventoryProduct();
   const updateProduct = useUpdateInventoryProduct(productId);
   const uploadFile = useUploadFile();
-
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
-
   const form = useForm<InventoryProduct>();
 
   const onCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,11 +77,38 @@ export default function InventoryProductFormPage({
         },
       });
     }
-    console.log(data);
     if (formType === "create") {
-      await createProduct.mutateAsync(data);
+      Swal.fire({
+        title: "Are you sure want to create this product?",
+        text: "You will not be able to recover this product!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, create it!",
+        cancelButtonText: "No, keep it.",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          createProduct.mutate(data);
+          Swal.fire("Created!", "Your product has been created.", "success");
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire("Cancelled", "Your product is safe :)", "error");
+        }
+      });
     } else if (formType === "update") {
-      await updateProduct.mutateAsync(data);
+      Swal.fire({
+        title: "Are you sure want to update this product with id " + productId,
+        text: "You will not be able to recover this product!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, update it!",
+        cancelButtonText: "No, keep it.",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          updateProduct.mutate(data);
+          Swal.fire("Updated!", "Your product has been updated.", "success");
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire("Cancelled", "Your product is safe :)", "error");
+        }
+      });
     }
   };
 

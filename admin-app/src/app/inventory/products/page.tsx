@@ -1,35 +1,14 @@
 "use client";
 
+import { Card, CardBody, CardHeader } from "@/components/Card";
+import InventoryTable from "@/components/InventoryTable";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventoryProductColumns } from "@/hooks/inventoryColumns";
 import { useGetInventoryProducts } from "@/queries/inventory-products";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { Card, CardHeader, CardBody } from "@/components/Card";
-import InventoryTable from "@/components/InventoryTable";
-
 
 export default function InventoryProductsPage() {
   const products = useGetInventoryProducts();
-  // const deleteProduct = useDeleteInventoryProduct();
   const columns = useInventoryProductColumns();
-
-
-  // function handleDeleteProduct(id: string) {
-  //   Swal.fire({
-  //     title: "Are you sure?",
-  //     text: "You will not be able to recover this product!",
-  //     icon: "warning",
-  //     showCancelButton: true,
-  //     confirmButtonText: "Yes, delete it!",
-  //     cancelButtonText: "No, keep it.",
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       deleteProduct.mutateAsync(id);
-  //       Swal.fire("Deleted!", "Your product has been deleted.", "success");
-  //     } else if (result.dismiss === Swal.DismissReason.cancel) {
-  //       Swal.fire("Cancelled", "Your product is safe :)", "error");
-  //     }
-  //   });
-  // }
 
   if (products.isLoading) {
     return <LoadingSpinner label="products data" />;
@@ -67,10 +46,7 @@ export default function InventoryProductsPage() {
           </div>
         </CardHeader>
         <CardBody>
-          <InventoryTable
-            data={products.data}
-            columns={columns as any}
-          />
+          <InventoryTable data={products.data} columns={columns as any} />
         </CardBody>
       </Card>
     </div>
