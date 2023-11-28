@@ -3,7 +3,6 @@
 import {
   InventoryIncoming,
   emptyInventoryIncoming,
-  fakeInventoryProducts,
 } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
 import { useUploadFile } from "@/queries/filesystem";
@@ -14,10 +13,10 @@ import {
 } from "@/queries/inventory-incoming";
 import { useGetInventoryProducts } from "@/queries/inventory-products";
 import { DocumentIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
 
 const countries: { label: string; value: string }[] = [
   { label: "Malaysia", value: "malaysia" },
@@ -27,11 +26,17 @@ const countries: { label: string; value: string }[] = [
 const units: { label: string; value: string }[] = [
   { label: "Square Feet", value: "sqft" },
   { label: "Square Meter", value: "sqm" },
+  { label: "Kilogram", value: "kg" },
+  { label: "Gram", value: "g" },
+  { label: "Liter", value: "litre" },
+  { label: "Pieces", value: "pcs" },
 ];
 
 const statuses: { label: string; value: string }[] = [
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
+  { label: "Incoming", value: "incoming" },
+  { label: "In-stock", value: "in-stock" },
+  { label: "Returned", value: "returned" },
+  { label: "Clearance", value: "clearance" },
 ];
 
 const FlatBadge = ({
@@ -130,14 +135,14 @@ export default function InventoryIncomingFormPage({
               title: "Updated!",
               text: "Your incoming has been updated.",
               icon: "success",
-            })
+            });
             router.push("/inventory/incomings");
           } catch (error) {
             Swal.fire({
               title: "Error!",
               text: `Cannot update incoming: ${error}`,
               icon: "error",
-            })
+            });
           }
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           Swal.fire({
@@ -148,12 +153,11 @@ export default function InventoryIncomingFormPage({
         }
       });
     }
-  }
+  };
 
   if (products.isLoading) {
     return <div>Loading...</div>;
   }
-
 
   return (
     <div>

@@ -22,8 +22,14 @@ export const useCreateInventoryOutgoing = () => {
   const queryClient = useQueryClient();
   return useMutation(
     async (outgoing: InventoryOutgoing) => {
-      const { data } = await axios.post(inOutgoingURL, outgoing);
-      return data;
+      await axios
+        .post(inOutgoingURL, outgoing)
+        .then((response) => {
+          return response.data;
+        })
+        .catch((error) => {
+          throw new Error(`${error.response.data.message}`);
+        });
     },
     {
       onSuccess: () => {
@@ -37,8 +43,14 @@ export const useUpdateInventoryOutgoing = (id: string) => {
   const queryClient = useQueryClient();
   return useMutation(
     async (outgoing: InventoryOutgoing) => {
-      const { data } = await axios.put(`${inOutgoingURL}/${id}`, outgoing);
-      return data;
+      await axios
+        .put(`${inOutgoingURL}/${id}`, outgoing)
+        .then((response) => {
+          return response.data;
+        })
+        .catch((error) => {
+          throw new Error(`${error.response.data.message}`);
+        });
     },
     {
       onSuccess: () => {

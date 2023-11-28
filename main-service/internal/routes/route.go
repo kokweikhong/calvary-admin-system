@@ -34,8 +34,10 @@ func Init() chi.Router {
 
 	// routes
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Mount("/inventory", NewInventoryRouter())
 		r.Mount("/filesystem", NewFileSystemRouter())
+
+		r.Mount("/inventory", NewInventoryRouter())
+		r.Mount("/", NewUserRouter())
 	})
 
 	return r

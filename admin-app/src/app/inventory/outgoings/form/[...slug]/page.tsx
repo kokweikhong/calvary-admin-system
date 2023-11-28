@@ -13,13 +13,14 @@ import {
   useUpdateInventoryOutgoing,
 } from "@/queries/inventory-outgoing";
 import { DocumentIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
+import Swal, { SweetAlertOptions } from "sweetalert2";
 
 const statuses: { label: string; value: string }[] = [
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
+  { label: "Collected", value: "collected" },
+  { label: "Reserved", value: "reserved" },
 ];
 
 const FlatBadge = ({
@@ -47,6 +48,7 @@ export default function InventoryOutgoingFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const router = useRouter();
   const formType = params.slug[0];
   const outgoingId = params.slug.length > 1 ? params.slug[1] : "";
   const outgoing = useGetInventoryOutgoing(outgoingId);
@@ -65,6 +67,75 @@ export default function InventoryOutgoingFormPage({
       setRefDoc(e.target.files[0]);
     }
   };
+
+  const sweetAlerOptions = (formType: string): SweetAlertOptions => {
+    const options: SweetAlertOptions = {
+      title: `Are you confirm to ${formType.toLowerCase()} this outgoing?`,
+      text: "You won't be able to revert this!",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: `Yes, ${formType.toLowerCase()} it!`,
+      cancelButtonText: "No, cancel!",
+      customClass: {
+        confirmButton: "bg-indigo-600",
+        cancelButton: "bg-gray-300",
+      },
+      buttonsStyling: false,
+    };
+    return options;
+  };
+
+  async function handleCreateOutgoing(data: InventoryOutgoing) {
+    try {
+      await createOutgoing.mutateAsync(data);
+      await Swal.fire({
+        title: "Created!",
+        text: "Your outgoing has been created.",
+        icon: "success",
+        customClass: {
+          confirmButton: "bg-indigo-600",
+        },
+        buttonsStyling: false,
+      });
+      router.push("/inventory/outgoings");
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: `${error}`,
+        icon: "error",
+        customClass: {
+          confirmButton: "bg-indigo-600",
+        },
+        buttonsStyling: false,
+      });
+    }
+  }
+
+  async function handleUpdateOutgoing(data: InventoryOutgoing) {
+    try {
+      await updateOutgoing.mutateAsync(data);
+      await Swal.fire({
+        title: "Updated!",
+        text: "Your outgoing has been updated.",
+        icon: "success",
+        customClass: {
+          confirmButton: "bg-indigo-600",
+        },
+        buttonsStyling: false,
+      });
+      router.push("/inventory/outgoings");
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: `${error}`,
+        icon: "error",
+        customClass: {
+          confirmButton: "bg-indigo-600",
+        },
+        buttonsStyling: false,
+      });
+    }
+  }
 
   React.useEffect(() => {
     if (formType === "create") {
@@ -89,59 +160,15 @@ export default function InventoryOutgoingFormPage({
       });
     }
     if (formType === "create") {
-      Swal.fire({
-        title: "Are you confirm to create this outgoing?",
-        text: "You won't be able to revert this!",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, create it!",
-        cancelButtonText: "No, cancel!",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-          cancelButton: "bg-gray-300",
-        },
-        buttonsStyling: false,
-      }).then(async (result) => {
+      Swal.fire(sweetAlerOptions("create")).then(async (result) => {
         if (result.isConfirmed) {
-          await createOutgoing.mutateAsync(data);
-          form.reset(emptyInventoryIncoming);
-          Swal.fire({
-            title: "Created!",
-            text: "Your outgoing has been created.",
-            icon: "success",
-            customClass: {
-              confirmButton: "bg-indigo-600",
-            },
-            buttonsStyling: false,
-          });
+          handleCreateOutgoing(data);
         }
       });
     } else if (formType === "update") {
-      Swal.fire({
-        title: "Are you confirm to update this outgoing?",
-        text: "You won't be able to revert this!",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, update it!",
-        cancelButtonText: "No, cancel!",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-          cancelButton: "bg-gray-300",
-        },
-        buttonsStyling: false,
-      }).then(async (result) => {
+      Swal.fire(sweetAlerOptions("update")).then(async (result) => {
         if (result.isConfirmed) {
-          await updateOutgoing.mutateAsync(data);
-          form.reset(emptyInventoryIncoming);
-          Swal.fire({
-            title: "Updated!",
-            text: "Your outgoing has been updated.",
-            icon: "success",
-            customClass: {
-              confirmButton: "bg-indigo-600",
-            },
-            buttonsStyling: false,
-          });
+          handleUpdateOutgoing(data);
         }
       });
     }

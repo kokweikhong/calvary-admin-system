@@ -9,11 +9,10 @@ import {
 } from "@/queries/inventory-products";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
-
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -34,6 +33,10 @@ const emptyProduct: InventoryProduct = {
 const standardUnits: { label: string; value: string }[] = [
   { label: "Square Feet", value: "sqft" },
   { label: "Square Meter", value: "sqm" },
+  { label: "Kilogram", value: "kg" },
+  { label: "Gram", value: "g" },
+  { label: "Liter", value: "litre" },
+  { label: "Pieces", value: "pcs" },
 ];
 
 export default function InventoryProductFormPage({
@@ -93,7 +96,11 @@ export default function InventoryProductFormPage({
         if (result.isConfirmed) {
           try {
             await createProduct.mutateAsync(data);
-            await Swal.fire("Created!", "Your product has been created.", "success");
+            await Swal.fire(
+              "Created!",
+              "Your product has been created.",
+              "success"
+            );
             router.push("/inventory/products");
           } catch (error) {
             Swal.fire("Error!", `Create product failed. ${error}`, "error");
@@ -114,7 +121,11 @@ export default function InventoryProductFormPage({
         if (result.isConfirmed) {
           try {
             await updateProduct.mutateAsync(data);
-            await Swal.fire("Updated!", "Your product has been updated.", "success");
+            await Swal.fire(
+              "Updated!",
+              "Your product has been updated.",
+              "success"
+            );
             router.push("/inventory/products");
           } catch (error) {
             Swal.fire("Error!", `Update product failed. ${error}`, "error");
@@ -125,7 +136,6 @@ export default function InventoryProductFormPage({
       });
     }
   };
-
 
   return (
     <div>
