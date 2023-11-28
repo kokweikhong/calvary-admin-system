@@ -12,11 +12,19 @@ import {
   useGetInventoryOutgoing,
   useUpdateInventoryOutgoing,
 } from "@/queries/inventory-outgoing";
+import { useGetInventoryProducts } from "@/queries/inventory-products";
+import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal, { SweetAlertOptions } from "sweetalert2";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const statuses: { label: string; value: string }[] = [
   { label: "Collected", value: "collected" },
@@ -52,7 +60,8 @@ export default function InventoryOutgoingFormPage({
   const formType = params.slug[0];
   const outgoingId = params.slug.length > 1 ? params.slug[1] : "";
   const outgoing = useGetInventoryOutgoing(outgoingId);
-  const products = fakeInventoryProducts;
+  const products = useGetInventoryProducts().data ?? [];
+  const incomings = useGetInventoryIncomings().data ?? [];
   const createOutgoing = useCreateInventoryOutgoing();
   const updateOutgoing = useUpdateInventoryOutgoing(outgoingId);
   const uploadFile = useUploadFile();
@@ -76,11 +85,6 @@ export default function InventoryOutgoingFormPage({
       showCancelButton: true,
       confirmButtonText: `Yes, ${formType.toLowerCase()} it!`,
       cancelButtonText: "No, cancel!",
-      customClass: {
-        confirmButton: "bg-indigo-600",
-        cancelButton: "bg-gray-300",
-      },
-      buttonsStyling: false,
     };
     return options;
   };
@@ -92,10 +96,6 @@ export default function InventoryOutgoingFormPage({
         title: "Created!",
         text: "Your outgoing has been created.",
         icon: "success",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-        },
-        buttonsStyling: false,
       });
       router.push("/inventory/outgoings");
     } catch (error) {
@@ -103,10 +103,6 @@ export default function InventoryOutgoingFormPage({
         title: "Error!",
         text: `${error}`,
         icon: "error",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-        },
-        buttonsStyling: false,
       });
     }
   }
@@ -118,10 +114,6 @@ export default function InventoryOutgoingFormPage({
         title: "Updated!",
         text: "Your outgoing has been updated.",
         icon: "success",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-        },
-        buttonsStyling: false,
       });
       router.push("/inventory/outgoings");
     } catch (error) {
@@ -129,10 +121,6 @@ export default function InventoryOutgoingFormPage({
         title: "Error!",
         text: `${error}`,
         icon: "error",
-        customClass: {
-          confirmButton: "bg-indigo-600",
-        },
-        buttonsStyling: false,
       });
     }
   }
@@ -210,9 +198,10 @@ export default function InventoryOutgoingFormPage({
                         {...field}
                         onChange={(e) => {
                           field.onChange(parseInt(e.target.value));
+                          form.setValue("incomingId", 0);
                         }}
                       >
-                        <option value="" disabled>
+                        <option value="0" disabled>
                           Please select a product
                         </option>
                         {products.map((product) => (
@@ -248,16 +237,71 @@ export default function InventoryOutgoingFormPage({
                         onChange={(e) => {
                           field.onChange(parseInt(e.target.value));
                         }}
+                        disabled={form.watch("productId") < 1}
                       >
-                        <option value="" disabled>
-                          Please select a product
+                        <option value="0" disabled>
+                          Please select an incoming
                         </option>
-                        {products.map((product) => (
-                          <option key={product.code} value={product.id}>
-                            {product.code} | {product.name}
-                          </option>
+                        {incomings.map((incoming) => (
+                          incoming.productId === form.watch("productId") && (
+                            <option key={incoming.id} value={incoming.id}>
+                              {incoming.id}{" > "}
+                              {incoming.balanceStdQty}{" "}{incoming.standardUnit}
+                              {" > ("}{incoming.balanceQty}{") "}
+                              {incoming.length > 0 ? incoming.length + " x " : ""}{" "}
+                              {incoming.width > 0 ? incoming.width + " x " : ""}{" "}
+                              {incoming.height > 0 ? incoming.height : ""}{" "}
+                              {incoming.length > 0 || incoming.width > 0 || incoming.height > 0 ? incoming.unit : ""}
+                            </option>
+                          )
                         ))}
                       </select>
+
+                      <p className="mt-3 text-sm leading-6 text-gray-600">
+                        {form.watch("incomingId") > 0 ? (
+                          <HoverCard>
+                            <HoverCardTrigger>
+                              <FlatBadge
+                                color="blue"
+                                label={
+                                  incomings.find(
+                                    (i) => i.id === form.watch("incomingId")
+                                  )?.productCode ?? "N/A"
+                                }
+                              />
+                            </HoverCardTrigger>
+                            <HoverCardContent>
+                              <ScrollArea className="h-96">
+                                <div className="flex flex-col gap-y-2">
+                                  {Object.entries(
+                                    incomings.find(
+                                      (i) =>
+                                        i.id === form.watch("incomingId")
+                                    ) ?? {}
+                                  ).map(([key, value]) => (
+                                    <div
+                                      key={key}
+                                      className="flex items-center gap-x-2"
+                                    >
+                                      <span className="text-xs font-medium text-gray-500">
+                                        {key}
+                                      </span>
+                                      <span className="text-xs text-gray-600">
+                                        {value}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </HoverCardContent>
+                          </HoverCard>
+                        ) : (
+                          <FlatBadge
+                            color="blue"
+                            label={"N/A"}
+                          />
+                        )}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -317,6 +361,9 @@ export default function InventoryOutgoingFormPage({
                         id="standardQuantity"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                       <p className="mt-3 text-sm leading-6 text-gray-600">
                         Std unit from product:{" "}
@@ -356,6 +403,9 @@ export default function InventoryOutgoingFormPage({
                         id="quantiy"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>
@@ -382,6 +432,9 @@ export default function InventoryOutgoingFormPage({
                         id="cost"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(parseFloat(e.target.value));
+                        }}
                       />
                     </div>
                   </div>

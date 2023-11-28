@@ -382,13 +382,30 @@ func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 			i.updated_at,
 			p.code AS product_code,
 			p.name AS product_name,
-			p.standard_unit AS standard_unit
-		FROM
-			inventory_incomings i
-		LEFT JOIN
-			inventory_products p
-		ON
-			i.product_id = p.id
+			p.standard_unit AS standard_unit,
+            
+            COALESCE(i.standard_quantity, 0) - COALESCE(o.sum_standard_quantity, 0) AS balance_std_qty,
+            COALESCE(i.quantity, 0) - COALESCE(o.sum_quantity, 0) AS balance_qty
+        FROM
+            inventory_incomings i
+        LEFT JOIN
+            inventory_products p
+        ON
+            i.product_id = p.id
+        LEFT JOIN (
+            SELECT
+                incoming_id,
+                SUM(COALESCE(standard_quantity, 0)) AS sum_standard_quantity,
+                SUM(COALESCE(quantity, 0)) AS sum_quantity
+            FROM
+                inventory_outgoings
+            GROUP BY
+                incoming_id
+            ) o
+        ON
+            i.id = o.incoming_id
+        ORDER BY
+            i.id DESC
 	`
 
 	// execute query with context, transaction, and arguments
@@ -425,9 +442,13 @@ func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 			&incoming.CreatedAt,
 			&incoming.UpdatedBy,
 			&incoming.UpdatedAt,
+
 			&incoming.ProductCode,
 			&incoming.ProductName,
 			&incoming.StandardUnit,
+
+			&incoming.BalanceStdQty,
+			&incoming.BalanceQty,
 		)
 		if err != nil {
 			slog.Error("Error scanning incoming", "error", err)
@@ -451,29 +472,51 @@ func (s *inventoryService) GetIncomings() ([]*models.InventoryIncoming, error) {
 func (s *inventoryService) GetIncoming(id int) (*models.InventoryIncoming, error) {
 	queryStr := `
 		SELECT
-			id,
-			product_id,
-			status,
-			quantity,
-			length,
-			width,
-			height,
-			unit,
-			standard_quantity,
-			ref_no,
-			ref_doc,
-			cost,
-			store_location,
-			store_country,
-			remarks,
-			created_by,
-			created_at,
-			updated_by,
-			updated_at
-		FROM
-			inventory_incomings
-		WHERE
-			id = $1
+			i.id,
+			i.product_id,
+			i.status,
+			i.quantity,
+			i.length,
+			i.width,
+			i.height,
+			i.unit,
+			i.standard_quantity,
+			i.ref_no,
+			i.ref_doc,
+			i.cost,
+			i.store_location,
+			i.store_country,
+			i.remarks,
+			i.created_by,
+			i.created_at,
+			i.updated_by,
+			i.updated_at,
+			p.code AS product_code,
+			p.name AS product_name,
+			p.standard_unit AS standard_unit,
+            
+            COALESCE(i.standard_quantity, 0) - COALESCE(o.sum_standard_quantity, 0) AS balance_std_qty,
+            COALESCE(i.quantity, 0) - COALESCE(o.sum_quantity, 0) AS balance_qty
+        FROM
+            inventory_incomings i
+        LEFT JOIN
+            inventory_products p
+        ON
+            i.product_id = p.id
+        LEFT JOIN (
+            SELECT
+                incoming_id,
+                SUM(COALESCE(standard_quantity, 0)) AS sum_standard_quantity,
+                SUM(COALESCE(quantity, 0)) AS sum_quantity
+            FROM
+                inventory_outgoings
+            GROUP BY
+                incoming_id
+            ) o
+        ON
+            i.id = o.incoming_id
+        ORDER BY
+            i.id DESC
 	`
 
 	// database execute with commit, transaction, context and commit
@@ -500,6 +543,13 @@ func (s *inventoryService) GetIncoming(id int) (*models.InventoryIncoming, error
 		&incoming.CreatedAt,
 		&incoming.UpdatedBy,
 		&incoming.UpdatedAt,
+		// get product info
+		&incoming.ProductCode,
+		&incoming.ProductName,
+		&incoming.StandardUnit,
+		// get balance quantity from outgoing
+		&incoming.BalanceStdQty,
+		&incoming.BalanceQty,
 	)
 	if err != nil {
 		slog.Error("Error scanning incoming", "error", err)
@@ -653,22 +703,32 @@ func (s *inventoryService) DeleteIncoming(id int) error {
 func (s *inventoryService) GetOutgoings() ([]*models.InventoryOutgoing, error) {
 	queryStr := `
 		SELECT
-			id,
-			incoming_id,
-			product_id,
-			status,
-			quantity,
-			standard_quantity,
-			cost,
-			ref_no,
-			ref_doc,
-			remarks,
-			created_by,
-			created_at,
-			updated_by,
-			updated_at
+			o.id,
+			o.incoming_id,
+			o.product_id,
+			o.status,
+			o.quantity,
+			o.standard_quantity,
+			o.cost,
+			o.ref_no,
+			o.ref_doc,
+			o.remarks,
+			o.created_by,
+			o.created_at,
+			o.updated_by,
+			o.updated_at,
+
+            p.code AS product_code,
+            p.name AS product_name,
+            p.standard_unit AS standard_unit
 		FROM
-			inventory_outgoings
+			inventory_outgoings o
+        LEFT JOIN
+            inventory_products p
+        ON
+            o.product_id = p.id
+        ORDER BY
+            o.id DESC
 	`
 
 	// execute query with context, transaction, and arguments
@@ -700,6 +760,10 @@ func (s *inventoryService) GetOutgoings() ([]*models.InventoryOutgoing, error) {
 			&outgoing.CreatedAt,
 			&outgoing.UpdatedBy,
 			&outgoing.UpdatedAt,
+
+			&outgoing.ProductCode,
+			&outgoing.ProductName,
+			&outgoing.StandardUnit,
 		)
 		if err != nil {
 			slog.Error("Error scanning outgoing", "error", err)

@@ -39,6 +39,9 @@ type InventoryIncoming struct {
 	ProductCode  string `json:"productCode" db:"product_code"`
 	ProductName  string `json:"productName" db:"product_name"`
 	StandardUnit string `json:"standardUnit" db:"standard_unit"`
+
+	BalanceStdQty float64 `json:"balanceStdQty" db:"balance_std_qty"`
+	BalanceQty    float64 `json:"balanceQty" db:"balance_qty"`
 }
 
 type InventoryOutgoing struct {
@@ -56,6 +59,10 @@ type InventoryOutgoing struct {
 	CreatedAt        string  `json:"createdAt" db:"created_at"`
 	UpdatedBy        string  `json:"updatedBy" db:"updated_by"`
 	UpdatedAt        string  `json:"updatedAt" db:"updated_at"`
+
+	ProductCode  string `json:"productCode" db:"product_code"`
+	ProductName  string `json:"productName" db:"product_name"`
+	StandardUnit string `json:"standardUnit" db:"standard_unit"`
 }
 
 type InventoryProductSummary struct {

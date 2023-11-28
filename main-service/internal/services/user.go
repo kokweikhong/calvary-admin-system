@@ -7,6 +7,7 @@ import (
 
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/db"
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
@@ -56,7 +57,7 @@ func (s *userService) GetUsers() ([]*models.User, error) {
 
 	defer rows.Close()
 
-	var users []*models.User
+    users := []*models.User{}
 
 	for rows.Next() {
 		user := new(models.User)
@@ -168,7 +169,15 @@ func (s *userService) CreateUser(user *models.User) error {
 		)
 	`
 
-	_, err := s.db.ExecContext(
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		slog.Error("Error hashing password", "error", err)
+		return err
+	}
+
+	user.Password = string(hashedPassword)
+
+	_, err = s.db.ExecContext(
 		context.Background(),
 		queryStr,
 		user.Username,
@@ -196,6 +205,26 @@ func (s *userService) CreateUser(user *models.User) error {
 }
 
 func (s *userService) UpdateUser(id int, user *models.User) error {
+	// compare password
+	// if password is different, hash it
+	// else, use the same password
+	oldUser, err := s.GetUser(id)
+	if err != nil {
+		slog.Error("Error getting user", "error", err)
+		return err
+	}
+
+	if oldUser.Password != user.Password {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			slog.Error("Error hashing password", "error", err)
+			return err
+		}
+
+		user.Password = string(hashedPassword)
+	}
+
+
 	queryStr := `
 		UPDATE users SET
 			username = $1,
@@ -215,7 +244,9 @@ func (s *userService) UpdateUser(id int, user *models.User) error {
 			id = $14
 	`
 
-	_, err := s.db.ExecContext(
+
+
+	_, err = s.db.ExecContext(
 		context.Background(),
 		queryStr,
 		user.Username,

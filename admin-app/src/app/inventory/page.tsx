@@ -132,15 +132,15 @@ export default function InventoryPage() {
                           {product.brand}
                         </p>
                       </div>
-                      <div className="mt-4 text-base font-medium text-gray-900">
+                      <div className="mt-4 text-base font-medium text-gray-900 flex flex-col space-y-1 justify-center items-center">
                         <div className="inline-flex items-center space-x-1">
                           <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                             <ArrowRightCircleIcon className="w-4 h-4 mr-1" />
-                            <span>{product.totalIncoming.toFixed(0)}</span>
+                            <span>{product.totalIncoming.toFixed(2)}</span>
                           </span>
                           <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-green-600/20">
                             <ArrowLeftCircleIcon className="w-4 h-4 mr-1" />
-                            <span>{product.totalOutgoing.toFixed(0)}</span>
+                            <span>{product.totalOutgoing.toFixed(2)}</span>
                           </span>
                         </div>
                         <span className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-inset ring-gray-200">
@@ -151,7 +151,7 @@ export default function InventoryPage() {
                           >
                             <circle cx={3} cy={3} r={3} />
                           </svg>
-                          {product.totalBalance.toFixed(0)}{" "}
+                          {product.totalBalance.toFixed(2)}{" "}
                           {product.standardUnit}
                         </span>
                       </div>

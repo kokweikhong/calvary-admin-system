@@ -277,6 +277,14 @@ export const useInventoryIncomingColumns = () => {
       columnHelperInIncoming.accessor("productName", {
         header: "P.Name",
       }),
+      columnHelperInIncoming.accessor("status", {
+        header: "Status",
+        cell: (info) => (
+          <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-800 ring-1 ring-inset ring-indigo-600/20">
+            {info.row.original.status}
+          </span>
+        ),
+      }),
       columnHelperInIncoming.accessor("refNo", {
         header: "Doc",
         cell: (info) => (
@@ -359,7 +367,7 @@ export const useInventoryOutgoingColumns = () => {
     });
   }
 
-  useMemo(
+  return useMemo(
     () => [
       columnHelperInOutgoing.display({
         id: "actions",
