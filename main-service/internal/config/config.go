@@ -14,6 +14,7 @@ type Config struct {
 	PostgresPassword string
 	PostgresDBName   string
 	ServerPort       string
+	JWTSecret        string
 }
 
 var Cfg = new(Config)
@@ -39,6 +40,8 @@ func Init() error {
 	Cfg.PostgresDBName = os.Getenv("POSTGRES_DB_NAME")
 
 	Cfg.ServerPort = os.Getenv("SERVER_PORT")
+
+	Cfg.JWTSecret = os.Getenv("JWT_SECRET")
 
 	return nil
 }
