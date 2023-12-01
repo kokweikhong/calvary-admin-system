@@ -6,3 +6,5 @@
 - [X] outgoing CRUD from frontend
 - [X] backend user CRUD
 - [ ] frontend user CRUD
+- [ ] JWT axios interceptor
+- [ ] Profile image call back
