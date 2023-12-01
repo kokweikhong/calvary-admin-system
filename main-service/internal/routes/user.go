@@ -5,15 +5,14 @@ import (
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/handlers"
 )
 
-func NewUserRouter() chi.Router {
+func NewUserRouter(r chi.Router) {
 	h := handlers.NewUserHandler()
-	r := chi.NewRouter()
+	r.Route("/users", func(r chi.Router) {
+		r.Get("/", h.GetUsers)
+		r.Get("/{id}", h.GetUser)
+		r.Post("/", h.CreateUser)
+		r.Put("/{id}", h.UpdateUser)
+		r.Delete("/{id}", h.DeleteUser)
+	})
 
-	r.Get("/users", h.GetUsers)
-	r.Get("/users/{id}", h.GetUser)
-	r.Post("/users", h.CreateUser)
-	r.Put("/users/{id}", h.UpdateUser)
-	r.Delete("/users/{id}", h.DeleteUser)
-
-	return r
 }

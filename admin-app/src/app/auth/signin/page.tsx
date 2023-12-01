@@ -2,8 +2,12 @@
 
 import Image from "next/image";
 import calvaryLogo from "../../../../public/logo_hori.png";
-import { useRef } from "react";
-import { signIn } from "@/actions/auth";
+import { useRef, useEffect } from "react";
+import { signIn } from "@/queries/auth";
+import { useSessionStore } from "@/context/SessionStore";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+
 
 type SignInRequest = {
   email: string;
@@ -11,18 +15,42 @@ type SignInRequest = {
 };
 
 export default function SignInPage() {
+  const { session, setSession } = useSessionStore();
+  const params = useSearchParams();
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const handleSubmit = async () => {
-    if (!formRef.current) {
-      throw new Error("Form not found");
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+    if (!email || !password) return;
+    const signInRequest: SignInRequest = {
+      email: email.toString(),
+      password: password.toString(),
+    };
+    console.log(signInRequest);
+    const data = await signIn(signInRequest.email, signInRequest.password);
+    if (data) {
+      setSession(data);
+      const callbackUrl = params.get("callback");
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push("/");
+      }
     }
-    const form = formRef.current;
-    const formData = new FormData(form as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries()) as SignInRequest;
     console.log(data);
-    await signIn(data);
-    form.reset();
+
+
+    // form.reset();
   };
+
+  useEffect(() => {
+    if (session) {
+      router.push("/");
+    }
+  }, [session]);
 
   return (
     <div>
@@ -40,13 +68,13 @@ export default function SignInPage() {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
           <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-            <form className="space-y-6" action={handleSubmit} ref={formRef}>
+            <form className="space-y-6" onSubmit={handleSubmit} ref={formRef}>
               <div>
                 <label
                   htmlFor="email"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Email address or username
+                  Email address
                 </label>
                 <div className="mt-2">
                   <input

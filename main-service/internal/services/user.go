@@ -57,7 +57,7 @@ func (s *userService) GetUsers() ([]*models.User, error) {
 
 	defer rows.Close()
 
-    users := []*models.User{}
+	users := []*models.User{}
 
 	for rows.Next() {
 		user := new(models.User)
@@ -148,6 +148,7 @@ func (s *userService) GetUser(id int) (*models.User, error) {
 }
 
 func (s *userService) CreateUser(user *models.User) error {
+    slog.Info("Creating user", "user", user)
 	queryStr := `
 		INSERT INTO users (
 			username,
@@ -161,13 +162,18 @@ func (s *userService) CreateUser(user *models.User) error {
 			is_verified,
 			verify_token,
 			verify_token_expires,
-			created_at,
-			updated_at
+            created_at,
+            updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9,
-			$10, $11, $12, $13
+			$10, NOW(), NOW(), NOW()
 		)
 	`
+	stmt, err := s.db.PrepareContext(context.Background(), queryStr)
+	if err != nil {
+		slog.Error("Error preparing statement", "error", err)
+		return err
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -177,12 +183,11 @@ func (s *userService) CreateUser(user *models.User) error {
 
 	user.Password = string(hashedPassword)
 
-	_, err = s.db.ExecContext(
+	_, err = stmt.ExecContext(
 		context.Background(),
-		queryStr,
 		user.Username,
 		user.Email,
-		user.Password,
+        user.Password,
 		user.Role,
 		user.Position,
 		user.Department,
@@ -190,9 +195,6 @@ func (s *userService) CreateUser(user *models.User) error {
 		user.IsExist,
 		user.IsVerified,
 		user.VerifyToken,
-		user.VerifyTokenExpire,
-		user.CreatedAt,
-		user.UpdatedAt,
 	)
 	if err != nil {
 		slog.Error("Error creating user", "error", err)
@@ -224,7 +226,6 @@ func (s *userService) UpdateUser(id int, user *models.User) error {
 		user.Password = string(hashedPassword)
 	}
 
-
 	queryStr := `
 		UPDATE users SET
 			username = $1,
@@ -243,8 +244,6 @@ func (s *userService) UpdateUser(id int, user *models.User) error {
 		WHERE
 			id = $14
 	`
-
-
 
 	_, err = s.db.ExecContext(
 		context.Background(),

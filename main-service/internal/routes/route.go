@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/kokweikhong/calvary-admin-system/main-service/internal/middlewares"
 )
 
 func Init() chi.Router {
@@ -35,11 +34,11 @@ func Init() chi.Router {
 
 	// routes
 	r.Route("/api/v1", func(r chi.Router) {
-		
-		r.Use(middlewares.NewAuthMiddleware().AuthRoute)
+		NewAuthRouter(r)
+		NewUserRouter(r)
+		// r.Use(middlewares.NewAuthMiddleware().AuthRoute)
 		r.Mount("/filesystem", NewFileSystemRouter())
 		r.Mount("/inventory", NewInventoryRouter())
-		r.Mount("/", NewUserRouter())
 	})
 
 	return r

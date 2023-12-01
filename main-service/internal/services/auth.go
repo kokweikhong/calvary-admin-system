@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -26,7 +27,7 @@ func NewAuthService() AuthService {
 	return &authService{}
 }
 
-func (s *authService) SignIn(username string, password string) (*models.AuthUser, error) {
+func (s *authService) SignIn(email string, password string) (*models.AuthUser, error) {
 	db := db.GetDB()
 
 	queryStr := `
@@ -48,13 +49,18 @@ func (s *authService) SignIn(username string, password string) (*models.AuthUser
         FROM
             users
         WHERE
-            username = $1 OR email = $1
+            email = $1
     `
 
-	row := db.QueryRow(queryStr, username)
+    stmt, err := db.Prepare(queryStr)
+    if err != nil {
+        return nil, err
+    }
+
+	row := stmt.QueryRow(email)
 
 	user := &models.User{}
-	err := row.Scan(
+	err = row.Scan(
 		&user.ID,
 		&user.Username,
 		&user.Email,
@@ -72,6 +78,7 @@ func (s *authService) SignIn(username string, password string) (*models.AuthUser
 	)
 
 	if err != nil {
+        slog.Error("failed to scan user", "error", err)
 		return nil, err
 	}
 

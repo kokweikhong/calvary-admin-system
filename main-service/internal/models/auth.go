@@ -28,3 +28,8 @@ type JWTPayload struct {
 	Issuer    string `json:"iss"`
 	ExpiresAt int64  `json:"exp"`
 }
+
+type SignInRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
