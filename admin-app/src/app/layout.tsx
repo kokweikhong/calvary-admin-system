@@ -3,6 +3,7 @@ import { QueryProvider } from "@/context/QueryContext";
 import { inter } from "@/lib/fonts";
 import { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,11 +18,13 @@ export default function RootLayout({
   return (
     <>
       <html lang="en" className={`h-full bg-white ${inter.variable}`}>
-        <QueryProvider>
-          <body className="h-full font-inter">
-            <SidebarLayout>{children}</SidebarLayout>
-          </body>
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <body className="h-full font-inter">
+              <SidebarLayout>{children}</SidebarLayout>
+            </body>
+          </QueryProvider>
+        </AuthProvider>
       </html>
     </>
   );

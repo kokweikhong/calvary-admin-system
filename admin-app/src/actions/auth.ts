@@ -8,21 +8,23 @@ import type { NextRequest } from "next/server";
 
 const key = "secret-key";
 
-export async function setSignInCookie(authResponse: Auth) {
+export async function setAuthCookie(authResponse: Auth) {
   const cookieStore = cookies();
   const encData = encryptData(JSON.stringify(authResponse), key);
-  console.log("authResponse", new Date(authResponse.refreshTokenExpiresAt * 1000));
+  const expires = new Date(authResponse.refreshToken.expiresAt * 1000);
+  console.log(authResponse.refreshToken.expiresAt);
+  console.log("expires", expires);
   cookieStore.set("auth.calvary", encData, {
     path: "/",
     // expires from authResponse and minus 5 hours
-    expires: new Date(authResponse.refreshTokenExpiresAt * 1000),
+    expires: new Date(authResponse.refreshToken.expiresAt * 1000),
     sameSite: "lax",
     secure: true,
     httpOnly: true,
   });
 }
 
-export async function getSignInCookie() {
+export async function getAuthCookie(): Promise<Auth | null> {
   const cookieStore = cookies();
   const encData = cookieStore.get("auth.calvary");
   if (encData) {
@@ -32,20 +34,18 @@ export async function getSignInCookie() {
   return null;
 }
 
-export async function removeSignInCookie() {
+export async function removeAuthCookie() {
   const cookieStore = cookies();
   cookieStore.delete("auth.calvary");
 }
 
-export async function isAuthenticated(req: NextRequest) {
-  const cookieStore = cookies();
-  const isAuthCookie = req.cookies.has("auth.calvary");
-  if (!isAuthCookie) return false;
-  const encData = cookieStore.get("auth.calvary");
-  const decData = decryptData(encData?.value ?? "", key);
-  const authResponse = JSON.parse(decData) as Auth;
-  if (new Date(authResponse.refreshTokenExpiresAt * 1000) > new Date()) {
-    return true;
+export async function getAuthFromRequest(req: NextRequest): Promise<Auth | null> {
+  const encData = req.cookies.get("auth.calvary");
+  if (encData) {
+    const decData = decryptData(encData.value, key);
+    return JSON.parse(decData) as Auth;
   }
-  return false;
+  return null;
 }
+
+

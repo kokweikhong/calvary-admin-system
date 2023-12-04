@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isAuthenticated } from "./actions/auth";
+import { getAuthFromRequest } from "./actions/auth";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const isAuth = await isAuthenticated(request);
-  console.log("isAuth", isAuth);
+  const auth = await getAuthFromRequest(request);
+  console.log("isAuth", auth);
   console.log("request.url", request.url);
   const pathname = request.nextUrl.pathname;
   console.log("pathname", pathname);
 
-  if (!isAuth) {
+  if (!auth) {
     return NextResponse.redirect(new URL('/auth/signin?callback=' + pathname, request.url))
   }
 
@@ -20,5 +20,9 @@ export async function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/teams/:path*"],
+  matcher: [
+    "/",
+    "/inventory/:path*",
+    "/teams/:path*",
+  ],
 }

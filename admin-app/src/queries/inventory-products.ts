@@ -7,6 +7,8 @@ import { FilterFn } from "@tanstack/react-table";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import Swal from "sweetalert2";
+import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+// import { axiosPrivate } from "@/queries/axios";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -19,18 +21,21 @@ declare module "@tanstack/table-core" {
 
 const inProductsURL = "http://localhost:8080/api/v1/inventory/products";
 
+
 export const useGetInventoryProducts = () => {
+  const axiosPrivate = useAxiosPrivate();
   return useQuery("inventory-products", async () => {
-    const { data } = await axios.get(inProductsURL);
+    const { data } = await axiosPrivate.get("/inventory/products");
     return data as InventoryProduct[];
   });
 };
 
 export const useGetInventoryProduct = (id: string) => {
+  const axiosPrivate = useAxiosPrivate();
   return useQuery(
     ["inventory-product", id],
     async () => {
-      const { data } = await axios.get(`${inProductsURL}/${id}`);
+      const { data } = await axiosPrivate.get(`inventory/products/${id}`);
       return data as InventoryProduct;
     },
     {
@@ -92,8 +97,9 @@ export const useDeleteInventoryProduct = () => {
 };
 
 export const useGetInventoryProductSummary = () => {
+  const axiosPrivate = useAxiosPrivate();
   return useQuery("inventory-product-summary", async () => {
-    const { data } = await axios.get(`${inProductsURL}/summary`);
+    const { data } = await axiosPrivate.get(`/inventory/products/summary`);
     return data as InventoryProductSummary[];
   });
 };

@@ -10,6 +10,7 @@ func NewAuthRouter(r chi.Router) {
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/signin", h.SignIn)
+		r.Post("/refresh-token", h.RefreshToken)
 	})
 
 }

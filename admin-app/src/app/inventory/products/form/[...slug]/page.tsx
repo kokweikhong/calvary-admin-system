@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import useInventoryProducts from "@/hooks/useInventoryProducts";
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -44,12 +45,16 @@ export default function InventoryProductFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const { getInventoryProduct, createInventoryProduct, updateInventoryProduct } = useInventoryProducts();
   const router = useRouter();
   const formType = params.slug[0];
   const productId = params.slug.length > 1 ? params.slug[1] : "";
-  const product = useGetInventoryProduct(productId);
-  const createProduct = useCreateInventoryProduct();
-  const updateProduct = useUpdateInventoryProduct(productId);
+  // const product = useGetInventoryProduct(productId);
+  // const createProduct = useCreateInventoryProduct();
+  // const updateProduct = useUpdateInventoryProduct(productId);
+  const product = getInventoryProduct(productId);
+  const createProduct = createInventoryProduct();
+  const updateProduct = updateInventoryProduct(productId);
   const uploadFile = useUploadFile();
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
   const form = useForm<InventoryProduct>();

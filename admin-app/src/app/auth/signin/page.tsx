@@ -3,19 +3,13 @@
 import Image from "next/image";
 import calvaryLogo from "../../../../public/logo_hori.png";
 import { useRef, useEffect } from "react";
-import { signIn } from "@/queries/auth";
-import { useSessionStore } from "@/context/SessionStore";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-
-
-type SignInRequest = {
-  email: string;
-  password: string;
-};
+import { AuthRequest } from "@/interfaces/auth";
+import useAuth from "@/hooks/useAuth";
 
 export default function SignInPage() {
-  const { session, setSession } = useSessionStore();
+  const { auth, signIn } = useAuth();
   const params = useSearchParams();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -25,32 +19,26 @@ export default function SignInPage() {
     const email = formData.get("email");
     const password = formData.get("password");
     if (!email || !password) return;
-    const signInRequest: SignInRequest = {
+    const signInRequest: AuthRequest = {
       email: email.toString(),
       password: password.toString(),
     };
-    console.log(signInRequest);
-    const data = await signIn(signInRequest.email, signInRequest.password);
-    if (data) {
-      setSession(data);
-      const callbackUrl = params.get("callback");
-      if (callbackUrl) {
-        router.push(callbackUrl);
-      } else {
-        router.push("/");
-      }
+    const callbackUrl = params.get("callback");
+    const data = signIn(signInRequest);
+    console.log(data)
+    formRef.current?.reset();
+    if (callbackUrl) {
+      router.push(callbackUrl);
+    } else {
+      router.push("/");
     }
-    console.log(data);
-
-
-    // form.reset();
   };
 
   useEffect(() => {
-    if (session) {
+    if (auth) {
       router.push("/");
     }
-  }, [session]);
+  }, [auth]);
 
   return (
     <div>

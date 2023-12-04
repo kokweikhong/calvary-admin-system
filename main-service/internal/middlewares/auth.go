@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -27,6 +28,7 @@ func (m *authMiddleware) AuthRoute(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get token from header
 		tokenString := r.Header.Get("Authorization")
+		slog.Info("Token", "token", tokenString)
 		if tokenString == "" {
 			m.jsonH.ErrorJSON(w, errors.New("missing token"), http.StatusUnauthorized)
 			return

@@ -3,11 +3,13 @@ package routes
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/handlers"
+	"github.com/kokweikhong/calvary-admin-system/main-service/internal/middlewares"
 )
 
 func NewInventoryRouter() chi.Router {
 	h := handlers.NewInventoryHandler()
 	r := chi.NewRouter()
+	r.Use(middlewares.NewAuthMiddleware().AuthRoute)
 
 	// Product
 	r.Get("/products", h.GetProducts)

@@ -1,7 +1,9 @@
-type Config = {
-  MainServiceURL: string;
-};
+import { z } from "zod";
 
-export const config: Config = {
-  MainServiceURL: process.env.NEXT_PUBLIC_MAIN_SERVICE_URL || "",
-};
+export const ConfigSchema = z.object({
+  mainServiceURL: z.string(),
+  apiURL: z.string(),
+  MainServiceURL: z.string(),
+});
+
+export type Config = z.infer<typeof ConfigSchema>;

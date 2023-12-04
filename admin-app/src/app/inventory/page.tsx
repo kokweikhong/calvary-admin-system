@@ -1,8 +1,8 @@
 "use client";
 
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { config } from "@/interfaces/config";
-import { useGetInventoryProductSummary } from "@/queries/inventory-products";
+import { getConfig } from "@/lib/config";
+// import { useGetInventoryProductSummary } from "@/queries/inventory-products";
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
@@ -14,15 +14,17 @@ import {
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { InventoryProductSummary } from "../../interfaces/inventory";
+import useInventoryProducts from "@/hooks/useInventoryProducts";
 
 export default function InventoryPage() {
-  // const products: InventoryProduct[] = fakeInventoryProducts;
+  const config = getConfig();
+  const { getInventoryProductSummary } = useInventoryProducts();
   const {
     data: products,
     isLoading,
     isError,
     error,
-  } = useGetInventoryProductSummary();
+  } = getInventoryProductSummary();
 
   const [filteredProducts, setFilteredProducts] = useState<
     InventoryProductSummary[]
@@ -98,9 +100,8 @@ export default function InventoryPage() {
                       {product.thumbnail !== "" ? (
                         <Image
                           loader={({ src, width, quality }) => {
-                            return `${
-                              config.MainServiceURL
-                            }/${src}?w=${width}&q=${quality || 75}`;
+                            return `${config.apiURL
+                              }/${src}?w=${width}&q=${quality || 75}`;
                           }}
                           src={product.thumbnail}
                           alt={`${product.name} product shot`}
@@ -116,13 +117,11 @@ export default function InventoryPage() {
                     </div>
                     <div className="pb-4 pt-10 text-center">
                       <h3 className="text-sm font-medium text-gray-900">
-                        <a href={""}>
-                          <span
-                            aria-hidden="true"
-                            className="absolute inset-0"
-                          />
-                          {product.name}
-                        </a>
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-0"
+                        />
+                        {product.name}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500">
                         {product.code}

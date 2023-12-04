@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { config } from "@/interfaces/config";
+import { getConfig } from "@/lib/config";
 import {
   InventoryIncoming,
   InventoryOutgoing,
@@ -30,7 +30,10 @@ import Swal from "sweetalert2";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { isImageExt } from "@/lib/utils";
 
+const config = getConfig();
+
 const columnHelperInProduct = createColumnHelper<InventoryProduct>();
+
 
 export const useInventoryProductColumns = () => {
   const deleteInventoryProduct = useDeleteInventoryProduct();
@@ -123,7 +126,7 @@ export const useInventoryProductColumns = () => {
 
             <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
               <Image
-                src={`${config.MainServiceURL}/${info.row.original.thumbnail}`}
+                src={`${config.apiURL}/${info.row.original.thumbnail}`}
                 alt="Profile Image"
                 sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
                 width={500}
@@ -290,7 +293,7 @@ export const useInventoryIncomingColumns = () => {
         cell: (info) => (
           <a
             target="_blank"
-            href={`${config.MainServiceURL}/${info.row.original.refDoc}`}
+            href={`${config.apiURL}/${info.row.original.refDoc}`}
             className="hover:text-indigo-500"
           >
             <DocumentTextIcon className="w-4 h-4" />
@@ -463,7 +466,7 @@ export const useInventoryOutgoingColumns = () => {
         cell: (info) => (
           <a
             target="_blank"
-            href={`${config.MainServiceURL}/${info.row.original.refDoc}`}
+            href={`${config.apiURL}/${info.row.original.refDoc}`}
             className="hover:text-indigo-500"
           >
             <DocumentTextIcon className="w-4 h-4" />

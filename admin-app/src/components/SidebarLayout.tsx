@@ -8,13 +8,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import calavaryLogo from "../../public/logo_hori.png";
 import NavLinks from "./NavLinks";
-import { useSessionStore } from "@/context/SessionStore";
-import { getSignInCookie } from "@/actions/auth";
-import { signOut } from "@/queries/auth";
 import { cn } from "@/lib/utils";
+import useAuth from "@/hooks/useAuth";
 
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -25,24 +23,10 @@ function classNames(...classes: string[]) {
 }
 
 const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
-  const { session, setSession, removeSession } = useSessionStore();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  async function getSession() {
-    const session = await getSignInCookie();
-    if (session) {
-      setSession(session);
-    }
-  }
+  const { auth, signOut } = useAuth();
 
-  async function handleSignOut() {
-    await signOut();
-    removeSession();
-  }
-
-  useEffect(() => {
-    getSession();
-  }, []);
 
   return (
     <div>
@@ -178,7 +162,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                         className="ml-4 text-sm font-semibold leading-6 text-gray-900"
                         aria-hidden="true"
                       >
-                        {session?.username}
+                        {auth?.user.username}
                       </span>
                       <ChevronDownIcon
                         className="ml-2 h-5 w-5 text-gray-400"
@@ -217,7 +201,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                             "block px-3 py-1 text-sm leading-6 text-gray-900",
                             "hover:bg-gray-50 w-full text-left"
                           )}
-                          onClick={handleSignOut}
+                          onClick={signOut}
                         >
                           Sign Out
                         </button>

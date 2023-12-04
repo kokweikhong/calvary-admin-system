@@ -56,7 +56,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { isImageExt } from "@/lib/utils";
-import { config } from "@/interfaces/config";
+import { config } from "@/lib/config";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {

@@ -13,9 +13,9 @@ import (
 )
 
 type AuthService interface {
-	SignIn(username string, password string) (*models.AuthUser, error)
+	SignIn(request *models.AuthSignInRequest) (*models.AuthUser, error)
 
-	RefreshAccessToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error)
+	RefreshToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error)
 	VerifyToken(tokenString string) (bool, error)
 	GenerateToken(username string, duration time.Duration) (*models.JWTPayload, error)
 }
@@ -27,7 +27,7 @@ func NewAuthService() AuthService {
 	return &authService{}
 }
 
-func (s *authService) SignIn(email string, password string) (*models.AuthUser, error) {
+func (s *authService) SignIn(request *models.AuthSignInRequest) (*models.AuthUser, error) {
 	db := db.GetDB()
 
 	queryStr := `
@@ -52,12 +52,12 @@ func (s *authService) SignIn(email string, password string) (*models.AuthUser, e
             email = $1
     `
 
-    stmt, err := db.Prepare(queryStr)
-    if err != nil {
-        return nil, err
-    }
+	stmt, err := db.Prepare(queryStr)
+	if err != nil {
+		return nil, err
+	}
 
-	row := stmt.QueryRow(email)
+	row := stmt.QueryRow(request.Email)
 
 	user := &models.User{}
 	err = row.Scan(
@@ -78,7 +78,7 @@ func (s *authService) SignIn(email string, password string) (*models.AuthUser, e
 	)
 
 	if err != nil {
-        slog.Error("failed to scan user", "error", err)
+		slog.Error("failed to scan user", "error", err)
 		return nil, err
 	}
 
@@ -86,35 +86,35 @@ func (s *authService) SignIn(email string, password string) (*models.AuthUser, e
 		return nil, errors.New("user does not exist")
 	}
 
-	comparePassword := s.comparePassord(user.Password, password)
+	comparePassword := s.comparePassord(user.Password, request.Password)
 	if !comparePassword {
 		return nil, errors.New("invalid password")
 	}
 
-	accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*15)
+	// accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*15)
+	accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*1)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshTokenPayload, err := s.GenerateToken(user.Username, time.Hour*24*7)
+	// refreshTokenPayload, err := s.GenerateToken(user.Username, time.Hour*24*7)
+	refreshTokenPayload, err := s.GenerateToken(user.Username, time.Minute*20)
 	if err != nil {
 		return nil, err
 	}
+
+	slog.Info("user logged in", "user", user)
 
 	authUser := &models.AuthUser{
-		UserID:                user.ID,
-		Username:              user.Username,
-		Role:                  user.Role,
-		AccessToken:           accessTokenPayload.Token,
-		AccessTokenExpiresAt:  accessTokenPayload.ExpiresAt,
-		RefreshToken:          refreshTokenPayload.Token,
-		RefreshTokenExpiresAt: refreshTokenPayload.ExpiresAt,
+		User:         user,
+		AccessToken:  accessTokenPayload,
+		RefreshToken: refreshTokenPayload,
 	}
 
 	return authUser, nil
 }
 
-func (s *authService) RefreshAccessToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error) {
+func (s *authService) RefreshToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error) {
 	isVerified, err := s.VerifyToken(refreshToken)
 	if err != nil {
 		return nil, err
@@ -123,11 +123,6 @@ func (s *authService) RefreshAccessToken(username, refreshToken string, duration
 	if !isVerified {
 		return nil, errors.New("invalid refresh token")
 	}
-
-    isSameUsername := s.isSameUsername(refreshToken, username)
-    if !isSameUsername {
-        return nil, errors.New("invalid refresh token")
-    }
 
 	payload, err := s.GenerateToken(username, duration)
 	if err != nil {
@@ -188,23 +183,6 @@ func (s *authService) GenerateToken(username string, duration time.Duration) (*m
 	payload.Issuer = issuer
 
 	return payload, nil
-}
-
-// check is same username
-func (s *authService) isSameUsername(tokenString, username string) bool {
-	token, err := jwt.ParseWithClaims(tokenString, &models.JWTCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Cfg.JWTSecret), nil
-	})
-	if err != nil {
-		return false
-	}
-
-	claims, ok := token.Claims.(*models.JWTCustomClaims)
-	if !ok {
-		return false
-	}
-
-	return claims.Username == username
 }
 
 func (s *authService) comparePassord(hashedPassword string, password string) bool {
