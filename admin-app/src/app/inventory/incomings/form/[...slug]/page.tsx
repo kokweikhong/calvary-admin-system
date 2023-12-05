@@ -11,6 +11,7 @@ import {
   useGetInventoryIncoming,
   useUpdateInventoryIncoming,
 } from "@/queries/inventory-incoming";
+import useInventoryIncomings from "@/hooks/useInventoryIncomings";
 import { useGetInventoryProducts } from "@/queries/inventory-products";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export default function InventoryIncomingFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const { getInventoryIncoming } = useInventoryIncomings();
   const router = useRouter();
   const formType = params.slug[0];
   const incomingId = params.slug.length > 1 ? params.slug[1] : "";

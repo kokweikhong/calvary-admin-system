@@ -16,6 +16,9 @@ import { cn } from "@/lib/utils";
 import { useDeleteInventoryIncoming } from "@/queries/inventory-incoming";
 import { useDeleteInventoryOutgoing } from "@/queries/inventory-outgoing";
 import { useDeleteInventoryProduct } from "@/queries/inventory-products";
+import useInventoryIncomings from "./useInventoryIncomings";
+import useInventoryOutgoings from "./useInventoryOutgoings";
+import useInventoryProducts from "./useInventoryProducts";
 import {
   DocumentTextIcon,
   EllipsisVerticalIcon,
@@ -36,7 +39,8 @@ const columnHelperInProduct = createColumnHelper<InventoryProduct>();
 
 
 export const useInventoryProductColumns = () => {
-  const deleteInventoryProduct = useDeleteInventoryProduct();
+  const { deleteInventoryProduct } = useInventoryProducts();
+  const deleteProduct = deleteInventoryProduct();
 
   async function handleDelete(id: number) {
     Swal.fire({
@@ -51,7 +55,7 @@ export const useInventoryProductColumns = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteInventoryProduct.mutateAsync(id.toString());
+          await deleteProduct.mutateAsync(id.toString());
           Swal.fire({
             title: "Deleted!",
             text: "Your product has been deleted.",
@@ -62,7 +66,7 @@ export const useInventoryProductColumns = () => {
         } catch (error) {
           Swal.fire({
             title: "Error!",
-            text: "Something went wrong!",
+            text: `${error}`,
             icon: "error",
             confirmButtonText: "Ok",
             confirmButtonColor: "#EF4444",
@@ -132,7 +136,7 @@ export const useInventoryProductColumns = () => {
                 width={500}
                 height={500}
                 priority={true}
-                className="h-full w-full object-cover object-center cursor-pointer group-hover:opacity-75"
+                className="h-full w-full object-contain object-center cursor-pointer group-hover:opacity-75"
                 onClick={() => {
                   info.row.toggleSelected(!info.row.getIsSelected());
                 }}
@@ -191,7 +195,8 @@ export const useInventoryProductColumns = () => {
 const columnHelperInIncoming = createColumnHelper<InventoryIncoming>();
 
 export const useInventoryIncomingColumns = () => {
-  const deleteIncoming = useDeleteInventoryIncoming();
+  const { deleteInventoryIncoming } = useInventoryIncomings();
+  const { mutateAsync: deleteIncoming } = deleteInventoryIncoming();
 
   function handleDelete(id: number) {
     Swal.fire({
@@ -206,7 +211,7 @@ export const useInventoryIncomingColumns = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteIncoming.mutateAsync(id.toString());
+          await deleteIncoming(id.toString());
           Swal.fire({
             title: "Deleted!",
             text: "Your incoming has been deleted.",
@@ -351,7 +356,8 @@ export const useInventoryIncomingColumns = () => {
 const columnHelperInOutgoing = createColumnHelper<InventoryOutgoing>();
 
 export const useInventoryOutgoingColumns = () => {
-  const deleteOutgoing = useDeleteInventoryOutgoing();
+  const { deleteInventoryOutgoing } = useInventoryOutgoings();
+  const {mutate: deleteOutgoing} = deleteInventoryOutgoing();
 
   function handleDelete(id: number) {
     Swal.fire({
@@ -365,7 +371,7 @@ export const useInventoryOutgoingColumns = () => {
       cancelButtonColor: "#6B7280",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteOutgoing.mutate(id.toString());
+        deleteOutgoing(id.toString());
       }
     });
   }

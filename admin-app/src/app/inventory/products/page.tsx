@@ -4,13 +4,11 @@ import { Card, CardBody, CardHeader } from "@/components/Card";
 import InventoryTable from "@/components/InventoryTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventoryProductColumns } from "@/hooks/inventoryColumns";
-// import { useGetInventoryProducts } from "@/queries/inventory-products";
 import useInventoryProducts from "@/hooks/useInventoryProducts";
 import Link from "next/link";
 
 export default function InventoryProductsPage() {
   const { getInventoryProducts } = useInventoryProducts();
-  // const products = useGetInventoryProducts();
   const products = getInventoryProducts();
   const columns = useInventoryProductColumns();
 

@@ -162,7 +162,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                       ) : (
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">
                           <span className="text-sm font-medium leading-none text-white">
-                            {auth?.user?.username.slice(0, 1).toUpperCase()}
+                            {auth?.user?.username.slice(0, 2).toUpperCase()}
                           </span>
                         </span>
                       )}

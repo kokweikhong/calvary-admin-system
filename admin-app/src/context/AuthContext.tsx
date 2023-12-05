@@ -41,6 +41,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const signOut = async () => {
     setAuth(null);
     await removeAuthCookie();
+    router.refresh();
   };
 
   const getAuth = async () => {
@@ -51,13 +52,9 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   useEffect(() => {
-    // router.refresh();
     getAuth();
-  }, [auth]);
+  }, []);
 
-  // useEffect(() => {
-  //   router.refresh()
-  // }, [auth])
 
   return (
     <AuthContext.Provider value={{ auth, setAuth, signIn, signOut }}>

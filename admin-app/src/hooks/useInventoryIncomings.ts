@@ -69,9 +69,9 @@ const useInventoryIncomings = () => {
     )
   }
 
-  const deleteInventoryIncoming = (id: string) => {
+  const deleteInventoryIncoming = () => {
     return useMutation(
-      async () => {
+      async (id: string) => {
         const response = await axiosPrivate.delete(`${inIncomingsURL}/${id}`);
         return response.data;
       },

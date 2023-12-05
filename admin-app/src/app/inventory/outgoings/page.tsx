@@ -4,11 +4,12 @@ import { Card, CardBody, CardHeader } from "@/components/Card";
 import InventoryTable from "@/components/InventoryTable";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventoryOutgoingColumns } from "@/hooks/inventoryColumns";
-import { useGetInventoryOutgoings } from "@/queries/inventory-outgoing";
+import useInventoryOutgoings from "@/hooks/useInventoryOutgoings";
 import Link from "next/link";
 
 export default function InventoryOutgoingPage() {
-  const outgoings = useGetInventoryOutgoings();
+  const { getInventoryOutgoings } = useInventoryOutgoings();
+  const outgoings = getInventoryOutgoings();
 
   const columns = useInventoryOutgoingColumns();
 
@@ -19,7 +20,7 @@ export default function InventoryOutgoingPage() {
   }
 
   if (outgoings.isError) {
-    throw new Error(`Error while fetching outgoings: ${outgoings.error}`);
+    throw outgoings.error;
   }
 
   return (

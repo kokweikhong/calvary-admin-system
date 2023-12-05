@@ -10,13 +10,12 @@ const useInventoryOutgoings = () => {
   const inOutgoingsURL = config.mainServiceURL + "/inventory/outgoings";
 
   const getInventoryOutgoings = () => {
-    return useQuery("inventory-outgoings", async () => {
+    return useQuery<InventoryOutgoing[], Error>("inventory-outgoings", async () => {
       const { data } = await axiosPrivate.get(inOutgoingsURL);
       return data as InventoryOutgoing[];
     }, {
       onError: (error) => {
-        console.log(error);
-        throw new Error(`failed to get inventory outgoings, ${error}`);
+        throw new Error(`failed to get inventory outgoings, ${error.message}`);
       }
     });
   }

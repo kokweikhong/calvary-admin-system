@@ -2,11 +2,7 @@
 
 import { InventoryProduct } from "@/interfaces/inventory";
 import { useUploadFile } from "@/queries/filesystem";
-import {
-  useCreateInventoryProduct,
-  useGetInventoryProduct,
-  useUpdateInventoryProduct,
-} from "@/queries/inventory-products";
+import useFilesystem from "@/hooks/useFilesystem";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -45,17 +41,20 @@ export default function InventoryProductFormPage({
 }: {
   params: { slug: string[] };
 }) {
-  const { getInventoryProduct, createInventoryProduct, updateInventoryProduct } = useInventoryProducts();
+  const {
+    getInventoryProduct,
+    createInventoryProduct,
+    updateInventoryProduct,
+  } = useInventoryProducts();
+  const { uploadFile: upFile } = useFilesystem();
   const router = useRouter();
   const formType = params.slug[0];
   const productId = params.slug.length > 1 ? params.slug[1] : "";
-  // const product = useGetInventoryProduct(productId);
-  // const createProduct = useCreateInventoryProduct();
-  // const updateProduct = useUpdateInventoryProduct(productId);
   const product = getInventoryProduct(productId);
   const createProduct = createInventoryProduct();
   const updateProduct = updateInventoryProduct(productId);
-  const uploadFile = useUploadFile();
+  // const uploadFile = useUploadFile();
+  const uploadFile = upFile();
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
   const form = useForm<InventoryProduct>();
 
