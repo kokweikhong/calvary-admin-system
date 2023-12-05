@@ -2,7 +2,6 @@
 
 import { Disclosure } from "@headlessui/react";
 import {
-  CalendarIcon,
   ChartPieIcon,
   ChevronRightIcon,
   DocumentDuplicateIcon,
@@ -10,6 +9,7 @@ import {
   HomeModernIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { UserCog } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 type NavigatinItem = {
@@ -47,7 +47,14 @@ const navigations: NavigatinItem[] = [
       { name: "Customer Success", href: "#", current: false },
     ],
   },
-  { name: "Upcoming1", href: "#", icon: CalendarIcon, current: false },
+  {
+    name: "Admin",
+    icon: UserCog,
+    current: false,
+    children: [
+      { name: "Create User", href: "/admin/create-user", current: false },
+    ],
+  },
   { name: "Upcoming2", href: "#", icon: DocumentDuplicateIcon, current: false },
   { name: "Upcoming3", href: "#", icon: ChartPieIcon, current: false },
 ];
