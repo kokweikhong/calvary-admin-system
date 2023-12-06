@@ -1,18 +1,14 @@
 "use client";
 
+import LoadingSpinner from "@/components/LoadingSpinner";
+import useFilesystem from "@/hooks/useFilesystem";
+import useInventoryIncomings from "@/hooks/useInventoryIncomings";
+import useInventoryProducts from "@/hooks/useInventoryProducts";
 import {
   InventoryIncoming,
   emptyInventoryIncoming,
 } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
-import { useUploadFile } from "@/queries/filesystem";
-import {
-  useCreateInventoryIncoming,
-  useGetInventoryIncoming,
-  useUpdateInventoryIncoming,
-} from "@/queries/inventory-incoming";
-import useInventoryIncomings from "@/hooks/useInventoryIncomings";
-import { useGetInventoryProducts } from "@/queries/inventory-products";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -65,12 +61,17 @@ export default function InventoryIncomingFormPage({
 }: {
   params: { slug: string[] };
 }) {
-  const { getInventoryIncoming } = useInventoryIncomings();
+  const {
+    useGetInventoryIncoming,
+    useCreateInventoryIncoming,
+    useUpdateInventoryIncoming,
+  } = useInventoryIncomings();
+  const { useGetInventoryProducts } = useInventoryProducts();
+  const { useUploadFile } = useFilesystem();
   const router = useRouter();
   const formType = params.slug[0];
   const incomingId = params.slug.length > 1 ? params.slug[1] : "";
   const incoming = useGetInventoryIncoming(incomingId);
-  // const products = fakeInventoryProducts;
   const createIncoming = useCreateInventoryIncoming();
   const updateIncoming = useUpdateInventoryIncoming(incomingId);
   const products = useGetInventoryProducts();
@@ -109,57 +110,45 @@ export default function InventoryIncomingFormPage({
         },
       });
     }
-    if (formType === "create") {
-      Swal.fire({
-        title: "Are you confirm to create this incoming?",
-        text: "You won't be able to revert this!",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, create it!",
-        cancelButtonText: "No, cancel!",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
+
+    Swal.fire({
+      title: `Are you sure you want to submit this ${formType} incoming?`,
+      text: "You won't be able to revert this!",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, submit it!",
+      cancelButtonText: "No, cancel!",
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        if (formType === "create") {
+          return createIncoming.mutateAsync(data);
+        } else {
+          return updateIncoming.mutateAsync(data);
         }
-      });
-    } else if (formType === "update") {
-      Swal.fire({
-        title: "Are you confirm to update this incoming?",
-        text: "You won't be able to revert this!",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, update it!",
-        cancelButtonText: "No, cancel!",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await updateIncoming.mutateAsync(data);
-            Swal.fire({
-              title: "Updated!",
-              text: "Your incoming has been updated.",
-              icon: "success",
-            });
-            router.push("/inventory/incomings");
-          } catch (error) {
-            Swal.fire({
-              title: "Error!",
-              text: `Cannot update incoming: ${error}`,
-              icon: "error",
-            });
-          }
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          Swal.fire({
-            title: "Cancelled!",
-            text: "Your incoming is not updated.",
-            icon: "error",
-          });
-        }
-      });
-    }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Submitted!",
+          text: "Incoming has been submitted.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          router.push("/inventory/incomings");
+        });
+      }
+    });
   };
 
-  if (products.isLoading) {
-    return <div>Loading...</div>;
+  if (products.isLoading || incoming.isLoading) {
+    return <LoadingSpinner />;
   }
+
+  if (products.isError) throw products.error;
+
+  if (incoming.isError) throw incoming.error;
 
   return (
     <div>

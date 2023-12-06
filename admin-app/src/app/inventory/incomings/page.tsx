@@ -8,8 +8,8 @@ import useInventoryIncomings from "@/hooks/useInventoryIncomings";
 import Link from "next/link";
 
 export default function InventoryIncomingPage() {
-  const { getInventoryIncomings } = useInventoryIncomings();
-  const incomings = getInventoryIncomings();
+  const { useGetInventoryIncomings } = useInventoryIncomings();
+  const incomings = useGetInventoryIncomings();
 
   const columns = useInventoryIncomingColumns();
 

@@ -1,7 +1,7 @@
-import { InventoryOutgoing } from "@/interfaces/inventory";
-import { useQuery, useQueryClient, useMutation } from "react-query";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import { InventoryOutgoing } from "@/interfaces/inventory";
 import { config } from "@/lib/config";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const useInventoryOutgoings = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -9,30 +9,40 @@ const useInventoryOutgoings = () => {
 
   const inOutgoingsURL = config.mainServiceURL + "/inventory/outgoings";
 
-  const getInventoryOutgoings = () => {
-    return useQuery<InventoryOutgoing[], Error>("inventory-outgoings", async () => {
-      const { data } = await axiosPrivate.get(inOutgoingsURL);
-      return data as InventoryOutgoing[];
-    }, {
-      onError: (error) => {
-        throw new Error(`failed to get inventory outgoings, ${error.message}`);
+  const useGetInventoryOutgoings = () => {
+    return useQuery<InventoryOutgoing[], Error>(
+      "inventory-outgoings",
+      async () => {
+        const { data } = await axiosPrivate.get(inOutgoingsURL);
+        return data as InventoryOutgoing[];
+      },
+      {
+        onError: (error) => {
+          throw new Error(
+            `failed to get inventory outgoings, ${error.message}`
+          );
+        },
       }
-    });
-  }
+    );
+  };
 
-  const getInventoryOutgoing = (id: string) => {
-    return useQuery(["inventory-outgoing", id], async () => {
-      const { data } = await axiosPrivate.get(`${inOutgoingsURL}/${id}`);
-      return data as InventoryOutgoing;
-    }, {
-      onError: (error) => {
-        console.log(error);
-        throw new Error(`failed to get inventory outgoing, ${error}`);
+  const useGetInventoryOutgoing = (id: string) => {
+    return useQuery(
+      ["inventory-outgoing", id],
+      async () => {
+        const { data } = await axiosPrivate.get(`${inOutgoingsURL}/${id}`);
+        return data as InventoryOutgoing;
+      },
+      {
+        onError: (error) => {
+          console.log(error);
+          throw new Error(`failed to get inventory outgoing, ${error}`);
+        },
       }
-    });
-  }
+    );
+  };
 
-  const createInventoryOutgoing = () => {
+  const useCreateInventoryOutgoing = () => {
     return useMutation(
       async (data: InventoryOutgoing) => {
         const response = await axiosPrivate.post(inOutgoingsURL, data);
@@ -47,13 +57,16 @@ const useInventoryOutgoings = () => {
           queryClient.invalidateQueries("inventory-outgoings");
         },
       }
-    )
-  }
+    );
+  };
 
-  const updateInventoryOutgoing = (id: string) => {
+  const useUpdateInventoryOutgoing = (id: string) => {
     return useMutation(
       async (data: InventoryOutgoing) => {
-        const response = await axiosPrivate.put(`${inOutgoingsURL}/${id}`, data);
+        const response = await axiosPrivate.put(
+          `${inOutgoingsURL}/${id}`,
+          data
+        );
         return response.data;
       },
       {
@@ -65,10 +78,10 @@ const useInventoryOutgoings = () => {
           queryClient.invalidateQueries("inventory-outgoings");
         },
       }
-    )
-  }
+    );
+  };
 
-  const deleteInventoryOutgoing = () => {
+  const useDeleteInventoryOutgoing = () => {
     return useMutation(
       async (id: string) => {
         const response = await axiosPrivate.delete(`${inOutgoingsURL}/${id}`);
@@ -81,18 +94,18 @@ const useInventoryOutgoings = () => {
         },
         onSuccess: () => {
           queryClient.invalidateQueries("inventory-outgoings");
-        }
+        },
       }
-    )
-  }
+    );
+  };
 
   return {
-    getInventoryOutgoings,
-    getInventoryOutgoing,
-    createInventoryOutgoing,
-    updateInventoryOutgoing,
-    deleteInventoryOutgoing,
-  }
-}
+    useGetInventoryOutgoings,
+    useGetInventoryOutgoing,
+    useCreateInventoryOutgoing,
+    useUpdateInventoryOutgoing,
+    useDeleteInventoryOutgoing,
+  };
+};
 
 export default useInventoryOutgoings;

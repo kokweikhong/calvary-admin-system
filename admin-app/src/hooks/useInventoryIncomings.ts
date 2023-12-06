@@ -1,7 +1,7 @@
-import { InventoryIncoming } from "@/interfaces/inventory";
-import { useQuery, useQueryClient, useMutation } from "react-query";
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
+import { InventoryIncoming } from "@/interfaces/inventory";
 import { config } from "@/lib/config";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const useInventoryIncomings = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -9,31 +9,39 @@ const useInventoryIncomings = () => {
 
   const inIncomingsURL = config.mainServiceURL + "/inventory/incomings";
 
-  const getInventoryIncomings = () => {
-    return useQuery("inventory-incomings", async () => {
-      const { data } = await axiosPrivate.get(inIncomingsURL);
-      return data as InventoryIncoming[];
-    }, {
-      onError: (error) => {
-        console.log(error);
-        throw new Error(`failed to get inventory incomings, ${error}`);
+  const useGetInventoryIncomings = () => {
+    return useQuery(
+      "inventory-incomings",
+      async () => {
+        const { data } = await axiosPrivate.get(inIncomingsURL);
+        return data as InventoryIncoming[];
+      },
+      {
+        onError: (error) => {
+          console.log(error);
+          throw new Error(`failed to get inventory incomings, ${error}`);
+        },
       }
-    });
-  }
+    );
+  };
 
-  const getInventoryIncoming = (id: string) => {
-    return useQuery(["inventory-incoming", id], async () => {
-      const { data } = await axiosPrivate.get(`${inIncomingsURL}/${id}`);
-      return data as InventoryIncoming;
-    }, {
-      onError: (error) => {
-        console.log(error);
-        throw new Error(`failed to get inventory incoming, ${error}`);
+  const useGetInventoryIncoming = (id: string) => {
+    return useQuery(
+      ["inventory-incoming", id],
+      async () => {
+        const { data } = await axiosPrivate.get(`${inIncomingsURL}/${id}`);
+        return data as InventoryIncoming;
+      },
+      {
+        onError: (error) => {
+          console.log(error);
+          throw new Error(`failed to get inventory incoming, ${error}`);
+        },
       }
-    });
-  }
+    );
+  };
 
-  const createInventoryIncoming = () => {
+  const useCreateInventoryIncoming = () => {
     return useMutation(
       async (data: InventoryIncoming) => {
         const response = await axiosPrivate.post(inIncomingsURL, data);
@@ -48,13 +56,16 @@ const useInventoryIncomings = () => {
           queryClient.invalidateQueries("inventory-incomings");
         },
       }
-    )
-  }
+    );
+  };
 
-  const updateInventoryIncoming = (id: string) => {
+  const useUpdateInventoryIncoming = (id: string) => {
     return useMutation(
       async (data: InventoryIncoming) => {
-        const response = await axiosPrivate.put(`${inIncomingsURL}/${id}`, data);
+        const response = await axiosPrivate.put(
+          `${inIncomingsURL}/${id}`,
+          data
+        );
         return response.data;
       },
       {
@@ -66,10 +77,10 @@ const useInventoryIncomings = () => {
           queryClient.invalidateQueries("inventory-incomings");
         },
       }
-    )
-  }
+    );
+  };
 
-  const deleteInventoryIncoming = () => {
+  const useDeleteInventoryIncoming = () => {
     return useMutation(
       async (id: string) => {
         const response = await axiosPrivate.delete(`${inIncomingsURL}/${id}`);
@@ -84,17 +95,16 @@ const useInventoryIncomings = () => {
           queryClient.invalidateQueries("inventory-incomings");
         },
       }
-    )
-  }
+    );
+  };
 
   return {
-    getInventoryIncomings,
-    getInventoryIncoming,
-    createInventoryIncoming,
-    updateInventoryIncoming,
-    deleteInventoryIncoming,
-  }
-
-}
+    useGetInventoryIncomings,
+    useGetInventoryIncoming,
+    useCreateInventoryIncoming,
+    useUpdateInventoryIncoming,
+    useDeleteInventoryIncoming,
+  };
+};
 
 export default useInventoryIncomings;

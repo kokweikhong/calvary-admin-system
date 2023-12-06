@@ -6,23 +6,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getConfig } from "@/lib/config";
 import {
   InventoryIncoming,
   InventoryOutgoing,
   InventoryProduct,
 } from "@/interfaces/inventory";
-import { cn } from "@/lib/utils";
-import { useDeleteInventoryIncoming } from "@/queries/inventory-incoming";
-import { useDeleteInventoryOutgoing } from "@/queries/inventory-outgoing";
-import { useDeleteInventoryProduct } from "@/queries/inventory-products";
-import useInventoryIncomings from "./useInventoryIncomings";
-import useInventoryOutgoings from "./useInventoryOutgoings";
-import useInventoryProducts from "./useInventoryProducts";
+import { getConfig } from "@/lib/config";
+import { cn, isImageExt } from "@/lib/utils";
 import {
   DocumentTextIcon,
   EllipsisVerticalIcon,
   PencilSquareIcon,
+  PhotoIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -30,17 +25,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import Swal from "sweetalert2";
-import { PhotoIcon } from "@heroicons/react/24/outline";
-import { isImageExt } from "@/lib/utils";
+import useInventoryIncomings from "./useInventoryIncomings";
+import useInventoryOutgoings from "./useInventoryOutgoings";
+import useInventoryProducts from "./useInventoryProducts";
 
 const config = getConfig();
 
 const columnHelperInProduct = createColumnHelper<InventoryProduct>();
 
-
 export const useInventoryProductColumns = () => {
-  const { deleteInventoryProduct } = useInventoryProducts();
-  const deleteProduct = deleteInventoryProduct();
+  const { useDeleteInventoryProduct } = useInventoryProducts();
+  const deleteProduct = useDeleteInventoryProduct();
 
   async function handleDelete(id: number) {
     Swal.fire({
@@ -125,9 +120,8 @@ export const useInventoryProductColumns = () => {
       }),
       columnHelperInProduct.accessor("thumbnail", {
         header: "Thumbnail",
-        cell: (info) => (
+        cell: (info) =>
           isImageExt(info.row.original.thumbnail) ? (
-
             <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
               <Image
                 src={`${config.apiURL}/${info.row.original.thumbnail}`}
@@ -151,8 +145,7 @@ export const useInventoryProductColumns = () => {
                 }}
               />
             </div>
-          )
-        ),
+          ),
       }),
       columnHelperInProduct.accessor("code", {
         header: "Code",
@@ -195,8 +188,8 @@ export const useInventoryProductColumns = () => {
 const columnHelperInIncoming = createColumnHelper<InventoryIncoming>();
 
 export const useInventoryIncomingColumns = () => {
-  const { deleteInventoryIncoming } = useInventoryIncomings();
-  const { mutateAsync: deleteIncoming } = deleteInventoryIncoming();
+  const { useDeleteInventoryIncoming } = useInventoryIncomings();
+  const { mutateAsync: deleteIncoming } = useDeleteInventoryIncoming();
 
   function handleDelete(id: number) {
     Swal.fire({
@@ -356,8 +349,8 @@ export const useInventoryIncomingColumns = () => {
 const columnHelperInOutgoing = createColumnHelper<InventoryOutgoing>();
 
 export const useInventoryOutgoingColumns = () => {
-  const { deleteInventoryOutgoing } = useInventoryOutgoings();
-  const {mutate: deleteOutgoing} = deleteInventoryOutgoing();
+  const { useDeleteInventoryOutgoing } = useInventoryOutgoings();
+  const { mutate: deleteOutgoing } = useDeleteInventoryOutgoing();
 
   function handleDelete(id: number) {
     Swal.fire({

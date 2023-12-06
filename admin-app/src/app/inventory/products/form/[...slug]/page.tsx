@@ -1,15 +1,15 @@
 "use client";
 
 import { InventoryProduct } from "@/interfaces/inventory";
-import { useUploadFile } from "@/queries/filesystem";
+
 import useFilesystem from "@/hooks/useFilesystem";
+import useInventoryProducts from "@/hooks/useInventoryProducts";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import useInventoryProducts from "@/hooks/useInventoryProducts";
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -42,19 +42,19 @@ export default function InventoryProductFormPage({
   params: { slug: string[] };
 }) {
   const {
-    getInventoryProduct,
-    createInventoryProduct,
-    updateInventoryProduct,
+    useGetInventoryProduct,
+    useCreateInventoryProduct,
+    useUpdateInventoryProduct,
   } = useInventoryProducts();
-  const { uploadFile: upFile } = useFilesystem();
+  const { useUploadFile } = useFilesystem();
   const router = useRouter();
   const formType = params.slug[0];
   const productId = params.slug.length > 1 ? params.slug[1] : "";
-  const product = getInventoryProduct(productId);
-  const createProduct = createInventoryProduct();
-  const updateProduct = updateInventoryProduct(productId);
+  const product = useGetInventoryProduct(productId);
+  const createProduct = useCreateInventoryProduct();
+  const updateProduct = useUpdateInventoryProduct(productId);
   // const uploadFile = useUploadFile();
-  const uploadFile = upFile();
+  const uploadFile = useUploadFile();
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
   const form = useForm<InventoryProduct>();
 

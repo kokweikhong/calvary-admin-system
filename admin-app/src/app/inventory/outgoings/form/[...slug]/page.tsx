@@ -1,30 +1,25 @@
 "use client";
 
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import useFilesystem from "@/hooks/useFilesystem";
+import useInventoryIncomings from "@/hooks/useInventoryIncomings";
+import useInventoryOutgoings from "@/hooks/useInventoryOutgoings";
+import useInventoryProducts from "@/hooks/useInventoryProducts";
+import {
   InventoryOutgoing,
   emptyInventoryIncoming,
-  fakeInventoryProducts,
 } from "@/interfaces/inventory";
 import { cn } from "@/lib/utils";
-import { useUploadFile } from "@/queries/filesystem";
-import {
-  useCreateInventoryOutgoing,
-  useGetInventoryOutgoing,
-  useUpdateInventoryOutgoing,
-} from "@/queries/inventory-outgoing";
-import { useGetInventoryProducts } from "@/queries/inventory-products";
-import { useGetInventoryIncomings } from "@/queries/inventory-incoming";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal, { SweetAlertOptions } from "sweetalert2";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const statuses: { label: string; value: string }[] = [
   { label: "Collected", value: "collected" },
@@ -56,6 +51,15 @@ export default function InventoryOutgoingFormPage({
 }: {
   params: { slug: string[] };
 }) {
+  const { useGetInventoryProducts } = useInventoryProducts();
+  const { useGetInventoryIncomings } = useInventoryIncomings();
+  const {
+    useGetInventoryOutgoing,
+    useCreateInventoryOutgoing,
+    useUpdateInventoryOutgoing,
+  } = useInventoryOutgoings();
+  const { useUploadFile } = useFilesystem();
+
   const router = useRouter();
   const formType = params.slug[0];
   const outgoingId = params.slug.length > 1 ? params.slug[1] : "";
@@ -242,19 +246,31 @@ export default function InventoryOutgoingFormPage({
                         <option value="0" disabled>
                           Please select an incoming
                         </option>
-                        {incomings.map((incoming) => (
-                          incoming.productId === form.watch("productId") && (
-                            <option key={incoming.id} value={incoming.id}>
-                              {incoming.id}{" > "}
-                              {incoming.balanceStdQty}{" "}{incoming.standardUnit}
-                              {" > ("}{incoming.balanceQty}{") "}
-                              {incoming.length > 0 ? incoming.length + " x " : ""}{" "}
-                              {incoming.width > 0 ? incoming.width + " x " : ""}{" "}
-                              {incoming.height > 0 ? incoming.height : ""}{" "}
-                              {incoming.length > 0 || incoming.width > 0 || incoming.height > 0 ? incoming.unit : ""}
-                            </option>
-                          )
-                        ))}
+                        {incomings.map(
+                          (incoming) =>
+                            incoming.productId === form.watch("productId") && (
+                              <option key={incoming.id} value={incoming.id}>
+                                {incoming.id}
+                                {" > "}
+                                {incoming.balanceStdQty} {incoming.standardUnit}
+                                {" > ("}
+                                {incoming.balanceQty}
+                                {") "}
+                                {incoming.length > 0
+                                  ? incoming.length + " x "
+                                  : ""}{" "}
+                                {incoming.width > 0
+                                  ? incoming.width + " x "
+                                  : ""}{" "}
+                                {incoming.height > 0 ? incoming.height : ""}{" "}
+                                {incoming.length > 0 ||
+                                incoming.width > 0 ||
+                                incoming.height > 0
+                                  ? incoming.unit
+                                  : ""}
+                              </option>
+                            )
+                        )}
                       </select>
 
                       <p className="mt-3 text-sm leading-6 text-gray-600">
@@ -275,8 +291,7 @@ export default function InventoryOutgoingFormPage({
                                 <div className="flex flex-col gap-y-2">
                                   {Object.entries(
                                     incomings.find(
-                                      (i) =>
-                                        i.id === form.watch("incomingId")
+                                      (i) => i.id === form.watch("incomingId")
                                     ) ?? {}
                                   ).map(([key, value]) => (
                                     <div
@@ -296,10 +311,7 @@ export default function InventoryOutgoingFormPage({
                             </HoverCardContent>
                           </HoverCard>
                         ) : (
-                          <FlatBadge
-                            color="blue"
-                            label={"N/A"}
-                          />
+                          <FlatBadge color="blue" label={"N/A"} />
                         )}
                       </p>
                     </div>

@@ -1,12 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import calvaryLogo from "../../../../public/logo_hori.png";
-import { useRef, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { AuthRequest } from "@/interfaces/auth";
 import useAuth from "@/hooks/useAuth";
+import { AuthRequest } from "@/interfaces/auth";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import calvaryLogo from "../../../../public/logo_hori.png";
 
 export default function SignInPage() {
   const { auth, signIn } = useAuth();
@@ -25,7 +24,6 @@ export default function SignInPage() {
     };
     const callbackUrl = params.get("callback");
     const data = signIn(signInRequest);
-    console.log(data)
     formRef.current?.reset();
     if (callbackUrl) {
       router.push(callbackUrl);
@@ -115,7 +113,6 @@ export default function SignInPage() {
                 </button>
               </div>
             </form>
-
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">

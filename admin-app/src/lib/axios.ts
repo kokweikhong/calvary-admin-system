@@ -1,10 +1,10 @@
+import { config } from "@/lib/config";
 import axios from "axios";
-import { getConfig } from "@/lib/config";
 
-const config = getConfig();
+// const config = getConfig();
 
 export const axiosPrivate = axios.create({
-  baseURL: config.apiURL + "/api/v1",
+  baseURL: config.mainServiceURL,
   // headers: {
   //   "Content-Type": "application/json",
   // },

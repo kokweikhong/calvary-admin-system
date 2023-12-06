@@ -8,12 +8,12 @@ import useInventoryOutgoings from "@/hooks/useInventoryOutgoings";
 import Link from "next/link";
 
 export default function InventoryOutgoingPage() {
-  const { getInventoryOutgoings } = useInventoryOutgoings();
-  const outgoings = getInventoryOutgoings();
+  const { useGetInventoryOutgoings } = useInventoryOutgoings();
+  const outgoings = useGetInventoryOutgoings();
 
   const columns = useInventoryOutgoingColumns();
 
-  console.log(columns)
+  console.log(columns);
 
   if (outgoings.isLoading) {
     return <LoadingSpinner label="outgoings data" />;

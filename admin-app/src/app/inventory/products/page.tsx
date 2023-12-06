@@ -8,17 +8,15 @@ import useInventoryProducts from "@/hooks/useInventoryProducts";
 import Link from "next/link";
 
 export default function InventoryProductsPage() {
-  const { getInventoryProducts } = useInventoryProducts();
-  const products = getInventoryProducts();
+  const { useGetInventoryProducts } = useInventoryProducts();
+  const products = useGetInventoryProducts();
   const columns = useInventoryProductColumns();
 
   if (products.isLoading) {
     return <LoadingSpinner label="products data" />;
   }
 
-  if (products.isError) {
-    throw new Error(`Error while fetching products: ${products.error}`);
-  }
+  if (products.isError) throw products.error;
 
   if (!products.data) {
     return <div>No products found</div>;

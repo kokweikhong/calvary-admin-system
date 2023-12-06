@@ -2,11 +2,11 @@
 
 import { axiosPrivate } from "@/queries/axios";
 import { useEffect } from "react";
-import useRefreshToken from "./useRefreshToken";
 import useAuth from "./useAuth";
+import useRefreshToken from "./useRefreshToken";
 
 const useAxiosPrivate = () => {
-  const { refreshToken } = useRefreshToken()
+  const { refreshToken } = useRefreshToken();
   const { auth } = useAuth();
 
   useEffect(() => {
@@ -33,7 +33,9 @@ const useAxiosPrivate = () => {
 
           console.log("newToken", newToken);
 
-          originalRequest.headers["Authorization"] = `Bearer ${newToken?.token}`;
+          originalRequest.headers[
+            "Authorization"
+          ] = `Bearer ${newToken?.token}`;
 
           return axiosPrivate(originalRequest);
         }
@@ -48,8 +50,6 @@ const useAxiosPrivate = () => {
   }, [auth, refreshToken]);
 
   return axiosPrivate;
-}
+};
 
 export default useAxiosPrivate;
-
-

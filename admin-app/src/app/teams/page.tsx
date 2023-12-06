@@ -1,15 +1,15 @@
 "use client";
 
-import useUsers from "@/hooks/useUsers";
-import Image from "next/image";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { EnvelopeIcon, UserIcon } from "@heroicons/react/20/solid";
+import useUsers from "@/hooks/useUsers";
 import { config } from "@/lib/config";
 import { isImageExt } from "@/lib/utils";
+import { EnvelopeIcon } from "@heroicons/react/20/solid";
+import Image from "next/image";
 
 export default function Example() {
-  const { getUsers } = useUsers();
-  const { data: users, error, isLoading } = getUsers();
+  const { useGetUsers } = useUsers();
+  const { data: users, error, isLoading } = useGetUsers();
 
   if (isLoading) {
     return <LoadingSpinner />;
