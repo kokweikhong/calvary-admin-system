@@ -1,10 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { encryptData, decryptData } from "@/lib/secure-data";
 import type { Auth } from "@/interfaces/auth";
+import { decryptData, encryptData } from "@/lib/secure-data";
+import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
-
 
 const key = "secret-key";
 
@@ -17,7 +16,9 @@ export async function setAuthCookie(authResponse: Auth) {
   cookieStore.set("auth.calvary", encData, {
     path: "/",
     // expires from authResponse and minus 5 hours
-    expires: new Date(authResponse.refreshToken.expiresAt * 1000),
+    expires: new Date(
+      authResponse.refreshToken.expiresAt * 1000 - 5 * 60 * 60 * 1000
+    ),
     sameSite: "lax",
     secure: true,
     httpOnly: true,
@@ -39,7 +40,9 @@ export async function removeAuthCookie() {
   cookieStore.delete("auth.calvary");
 }
 
-export async function getAuthFromRequest(req: NextRequest): Promise<Auth | null> {
+export async function getAuthFromRequest(
+  req: NextRequest
+): Promise<Auth | null> {
   const encData = req.cookies.get("auth.calvary");
   if (encData) {
     const decData = decryptData(encData.value, key);
@@ -47,5 +50,3 @@ export async function getAuthFromRequest(req: NextRequest): Promise<Auth | null>
   }
   return null;
 }
-
-
