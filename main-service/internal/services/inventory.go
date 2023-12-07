@@ -515,8 +515,9 @@ func (s *inventoryService) GetIncoming(id int) (*models.InventoryIncoming, error
             ) o
         ON
             i.id = o.incoming_id
-        ORDER BY
-            i.id DESC
+		WHERE
+			i.id = $1
+			
 	`
 
 	// database execute with commit, transaction, context and commit

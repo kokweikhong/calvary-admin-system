@@ -3,6 +3,9 @@
 import { User } from "@/interfaces/user";
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import useUsers from "@/hooks/useUsers";
+import { useState } from "react";
+import { isImageExt } from "@/lib/utils";
 
 type UserProfileFormProps = {
   user: User;
@@ -50,12 +53,18 @@ export default function UserProfileForm({
   action,
   isAdmin = false,
 }: UserProfileFormProps) {
+  const { useCreateUser } = useUsers();
+
+  const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+
   const form = useForm<User>({
     defaultValues: user,
   });
 
   const onSubmit: SubmitHandler<User> = (data) => {
+    console.log(coverPhoto);
     console.log(data);
+    
   };
 
   return (
@@ -294,6 +303,12 @@ export default function UserProfileForm({
                         name="file-upload"
                         type="file"
                         className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file && isImageExt(file.name)) {
+                            setCoverPhoto(file);
+                          }
+                        }}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>

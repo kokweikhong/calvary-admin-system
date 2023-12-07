@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "react-query";
 const useFilesystem = () => {
   const queryClient = useQueryClient();
   const axiosPrivate = useAxiosPrivate();
-  const filesystemURL = "/filesystem";
+  const filesystemURL = "/api/v1/filesystem";
 
   const useUploadFile = () => {
     return useMutation(

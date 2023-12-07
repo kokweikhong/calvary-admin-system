@@ -26,19 +26,21 @@ const useInventoryOutgoings = () => {
   };
 
   const useGetInventoryOutgoing = (id: string) => {
-    return useQuery(
-      ["inventory-outgoing", id],
-      async () => {
+    return useQuery({
+      queryKey: ["inventory-outgoing", id],
+      queryFn: async () => {
         const { data } = await axiosPrivate.get(`${inOutgoingsURL}/${id}`);
         return data as InventoryOutgoing;
       },
-      {
-        onError: (error) => {
-          console.log(error);
-          throw new Error(`failed to get inventory outgoing, ${error}`);
-        },
-      }
-    );
+      enabled: !!id,
+      onSuccess: () => {
+        queryClient.invalidateQueries("inventory-outgoings");
+      },
+      onError: (error) => {
+        console.log(error);
+        throw new Error(`failed to get inventory outgoing, ${error}`);
+      },
+    });
   };
 
   const useCreateInventoryOutgoing = () => {

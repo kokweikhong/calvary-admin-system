@@ -65,8 +65,8 @@ func (h *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	authUser, err := h.service.RefreshToken(
 		refreshTokenRequest.Username,
 		refreshTokenRequest.RefreshToken,
-		time.Minute*1,
-		// time.Minute*15,
+		// time.Minute*1,
+		time.Minute*30,
 	)
 
 	if err != nil {

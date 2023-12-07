@@ -28,19 +28,18 @@ const useInventoryProducts = () => {
   };
 
   const useGetInventoryProduct = (id: string) => {
-    return useQuery(
-      ["inventory-product", id],
-      async () => {
+    return useQuery({
+      queryKey: ["inventory-product", id],
+      queryFn: async () => {
         const { data } = await axiosPrivate.get(`${inProductsURL}/${id}`);
         return data as InventoryProduct;
       },
-      {
-        onError: (error) => {
-          console.log(error);
-          throw new Error(`failed to get inventory product, ${error}`);
-        },
-      }
-    );
+      enabled: !!id,
+      onError: (error: Error) => {
+        console.log(error);
+        throw new Error(`failed to get inventory product, ${error}`);
+      },
+    });
   };
 
   const useCreateInventoryProduct = () => {

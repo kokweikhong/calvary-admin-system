@@ -91,14 +91,14 @@ func (s *authService) SignIn(request *models.AuthSignInRequest) (*models.AuthUse
 		return nil, errors.New("invalid password")
 	}
 
-	// accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*15)
-	accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*1)
+	accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*30)
+	// accessTokenPayload, err := s.GenerateToken(user.Username, time.Minute*1)
 	if err != nil {
 		return nil, err
 	}
 
-	// refreshTokenPayload, err := s.GenerateToken(user.Username, time.Hour*24*7)
-	refreshTokenPayload, err := s.GenerateToken(user.Username, time.Minute*20)
+	refreshTokenPayload, err := s.GenerateToken(user.Username, time.Hour*24*7)
+	// refreshTokenPayload, err := s.GenerateToken(user.Username, time.Minute*20)
 	if err != nil {
 		return nil, err
 	}

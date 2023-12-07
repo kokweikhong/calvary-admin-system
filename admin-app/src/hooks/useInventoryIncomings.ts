@@ -25,19 +25,21 @@ const useInventoryIncomings = () => {
   };
 
   const useGetInventoryIncoming = (id: string) => {
-    return useQuery(
-      ["inventory-incoming", id],
-      async () => {
+    return useQuery({
+      queryKey: ["inventory-incoming", id],
+      queryFn: async () => {
         const { data } = await axiosPrivate.get(`${inIncomingsURL}/${id}`);
         return data as InventoryIncoming;
       },
-      {
-        onError: (error) => {
-          console.log(error);
-          throw new Error(`failed to get inventory incoming, ${error}`);
-        },
-      }
-    );
+      enabled: !!id,
+      onSuccess: () => {
+        queryClient.invalidateQueries("inventory-incomings");
+      },
+      onError: (error) => {
+        console.log(error);
+        throw new Error(`failed to get inventory incoming, ${error}`);
+      },
+    });
   };
 
   const useCreateInventoryIncoming = () => {

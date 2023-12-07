@@ -40,6 +40,7 @@ export async function getAuthFromRequest(
   req: NextRequest
 ): Promise<Auth | null> {
   const encData = req.cookies.get("auth.calvary");
+  console.log("getAuthFromRequest", encData);
   if (encData) {
     const decData = decryptData(encData.value, config.encrytedKey);
     return JSON.parse(decData) as Auth;
