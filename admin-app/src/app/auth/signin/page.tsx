@@ -23,7 +23,7 @@ export default function SignInPage() {
       password: password.toString(),
     };
     const callbackUrl = params.get("callback");
-    const data = signIn(signInRequest);
+    signIn(signInRequest);
     formRef.current?.reset();
     if (callbackUrl) {
       router.push(callbackUrl);
