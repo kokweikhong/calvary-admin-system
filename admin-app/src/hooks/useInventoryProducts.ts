@@ -9,7 +9,7 @@ const useInventoryProducts = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
 
-  const inProductsURL = "/inventory/products";
+  const inProductsURL = "/api/v1/inventory/products";
 
   const useGetInventoryProducts = () => {
     return useQuery(

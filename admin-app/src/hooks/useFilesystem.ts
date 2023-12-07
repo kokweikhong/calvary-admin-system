@@ -1,11 +1,10 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
-import { config } from "@/lib/config";
 import { useMutation, useQueryClient } from "react-query";
 
 const useFilesystem = () => {
   const queryClient = useQueryClient();
   const axiosPrivate = useAxiosPrivate();
-  const filesystemURL = config.mainServiceURL + "/filesystem";
+  const filesystemURL = "/filesystem";
 
   const useUploadFile = () => {
     return useMutation(

@@ -1,6 +1,6 @@
 "use client";
 
-import { axiosPrivate } from "@/queries/axios";
+import { axiosPrivate } from "@/lib/axios";
 import { useEffect } from "react";
 import useAuth from "./useAuth";
 import useRefreshToken from "./useRefreshToken";

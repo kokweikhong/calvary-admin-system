@@ -1,7 +1,6 @@
 "use client";
 
 import { User } from "@/interfaces/user";
-import { config } from "@/lib/config";
 import { QueryClient, useMutation, useQuery } from "react-query";
 import useAxiosPrivate from "./useAxiosPrivate";
 
@@ -9,7 +8,7 @@ const useUsers = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = new QueryClient();
 
-  const usersURL = `${config.mainServiceURL}/users`;
+  const usersURL = "/api/v1/users";
 
   const useGetUsers = () => {
     return useQuery<User[], Error>(

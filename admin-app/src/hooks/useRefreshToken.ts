@@ -1,15 +1,13 @@
 "use client";
 
 import { JWTPayload } from "@/interfaces/auth";
-import useAuth from "./useAuth";
-import { getConfig } from "@/lib/config";
+import { config } from "@/lib/config";
 import axios from "axios";
-
+import useAuth from "./useAuth";
 
 const useRefreshToken = () => {
   const { auth, setAuth } = useAuth();
-  const config = getConfig();
-  const url = config.apiURL + "/api/v1/auth/refresh-token";
+  const url = config.mainServiceURL + "/auth/refresh-token";
 
   const refreshToken = async (): Promise<JWTPayload | undefined> => {
     if (!auth) {
@@ -28,10 +26,9 @@ const useRefreshToken = () => {
     } catch (error) {
       throw new Error(`Error refreshing token: ${error}`);
     }
-  }
+  };
 
   return { refreshToken };
-}
+};
 
 export default useRefreshToken;
-

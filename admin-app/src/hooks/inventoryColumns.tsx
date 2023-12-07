@@ -124,7 +124,7 @@ export const useInventoryProductColumns = () => {
           isImageExt(info.row.original.thumbnail) ? (
             <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
               <Image
-                src={`${config.apiURL}/${info.row.original.thumbnail}`}
+                src={`${config.mainServiceURL}/${info.row.original.thumbnail}`}
                 alt="Profile Image"
                 sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
                 width={500}
@@ -291,7 +291,7 @@ export const useInventoryIncomingColumns = () => {
         cell: (info) => (
           <a
             target="_blank"
-            href={`${config.apiURL}/${info.row.original.refDoc}`}
+            href={`${config.mainServiceURL}/${info.row.original.refDoc}`}
             className="hover:text-indigo-500"
           >
             <DocumentTextIcon className="w-4 h-4" />
@@ -465,7 +465,7 @@ export const useInventoryOutgoingColumns = () => {
         cell: (info) => (
           <a
             target="_blank"
-            href={`${config.apiURL}/${info.row.original.refDoc}`}
+            href={`${config.mainServiceURL}/${info.row.original.refDoc}`}
             className="hover:text-indigo-500"
           >
             <DocumentTextIcon className="w-4 h-4" />

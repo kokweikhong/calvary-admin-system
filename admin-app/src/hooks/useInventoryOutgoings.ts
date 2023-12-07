@@ -1,13 +1,12 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { InventoryOutgoing } from "@/interfaces/inventory";
-import { config } from "@/lib/config";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const useInventoryOutgoings = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
 
-  const inOutgoingsURL = config.mainServiceURL + "/inventory/outgoings";
+  const inOutgoingsURL = "/api/v1/inventory/outgoings";
 
   const useGetInventoryOutgoings = () => {
     return useQuery<InventoryOutgoing[], Error>(

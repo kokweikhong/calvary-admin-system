@@ -1,13 +1,12 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { InventoryIncoming } from "@/interfaces/inventory";
-import { config } from "@/lib/config";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const useInventoryIncomings = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
 
-  const inIncomingsURL = config.mainServiceURL + "/inventory/incomings";
+  const inIncomingsURL = "/api/v1/inventory/incomings";
 
   const useGetInventoryIncomings = () => {
     return useQuery(
