@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const UserSchema = z.object({
-  id: z.number(),
+  id: z.number().nullish(),
   username: z.string(),
   email: z.string(),
   password: z.string(),
@@ -20,7 +20,7 @@ export const UserSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 
 export const emptyUser: User = {
-  id: 0,
+  // id: 0,
   username: "",
   email: "",
   password: "",

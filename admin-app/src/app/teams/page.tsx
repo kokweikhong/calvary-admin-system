@@ -50,9 +50,11 @@ export default function Example() {
             </div>
             {isImageExt(user.profileImage) ? (
               <Image
-                className="h-10 w-10 flex-shrink-0 rounded-full bg-gray-300"
+                className="flex-shrink-0 rounded-full bg-gray-300"
                 src={`${config.mainServiceURL}/${user.profileImage}`}
                 alt={user.username}
+                width={40}
+                height={40}
               />
             ) : (
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">

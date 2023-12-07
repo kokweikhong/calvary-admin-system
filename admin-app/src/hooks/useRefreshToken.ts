@@ -7,7 +7,7 @@ import useAuth from "./useAuth";
 
 const useRefreshToken = () => {
   const { auth, setAuth } = useAuth();
-  const url = config.mainServiceURL + "/auth/refresh-token";
+  const url = config.mainServiceURL + "/api/v1/auth/refresh-token";
 
   const refreshToken = async (): Promise<JWTPayload | undefined> => {
     if (!auth) {

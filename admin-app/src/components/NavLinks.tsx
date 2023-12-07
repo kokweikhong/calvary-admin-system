@@ -43,8 +43,8 @@ const navigations: NavigatinItem[] = [
     current: false,
     children: [
       { name: "Dashboard", href: "/teams", current: false },
-      { name: "Human Resources", href: "#", current: false },
-      { name: "Customer Success", href: "#", current: false },
+      // { name: "Human Resources", href: "#", current: false },
+      // { name: "Customer Success", href: "#", current: false },
     ],
   },
   {
@@ -53,6 +53,7 @@ const navigations: NavigatinItem[] = [
     current: false,
     children: [
       { name: "Create User", href: "/admin/create-user", current: false },
+      { name: "Update User", href: "/admin/update-user", current: false },
     ],
   },
   { name: "Upcoming2", href: "#", icon: DocumentDuplicateIcon, current: false },
