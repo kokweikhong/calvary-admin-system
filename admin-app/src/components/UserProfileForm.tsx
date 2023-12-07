@@ -16,6 +16,35 @@ const NotAdminMessage = () => (
   </p>
 );
 
+const roles = [
+  { value: "admin", label: "Admin" },
+  { value: "user", label: "User" },
+];
+
+const departments = [
+  { value: "hq", label: "Headquarters" },
+  { value: "sales", label: "Sales" },
+  { value: "marketing", label: "Marketing" },
+  { value: "engineering", label: "Engineering" },
+  { value: "hr", label: "Human Resources" },
+  { value: "finance", label: "Finance" },
+  { value: "legal", label: "Legal" },
+  { value: "operations", label: "Operations" },
+  { value: "other", label: "Other" },
+];
+
+const positions = [
+  { value: "ceo", label: "CEO" },
+  { value: "cto", label: "CTO" },
+  { value: "cfo", label: "CFO" },
+  { value: "coo", label: "COO" },
+  { value: "vp", label: "VP" },
+  { value: "director", label: "Director" },
+  { value: "manager", label: "Manager" },
+  { value: "staff", label: "Staff" },
+  { value: "other", label: "Other" },
+];
+
 export default function UserProfileForm({
   user,
   action,
@@ -136,9 +165,14 @@ export default function UserProfileForm({
                     {...field}
                     disabled={!isAdmin}
                   >
-                    <option value={"aa"}>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
+                    <option value="" disabled>
+                      Please select a role
+                    </option>
+                    {roles.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {!isAdmin && <NotAdminMessage />}
@@ -165,9 +199,14 @@ export default function UserProfileForm({
                     {...field}
                     disabled={!isAdmin}
                   >
-                    <option value={"aa"}>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
+                    <option value={""} disabled>
+                      Please select a department
+                    </option>
+                    {departments.map((department) => (
+                      <option key={department.value} value={department.value}>
+                        {department.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {!isAdmin && <NotAdminMessage />}
@@ -194,9 +233,15 @@ export default function UserProfileForm({
                     {...field}
                     disabled={!isAdmin}
                   >
-                    <option value={"aa"}>United States</option>
-                    <option>Canada</option>
-                    <option>Mexico</option>
+                    <option value={""} disabled>
+                      {" "}
+                      Please select a position{" "}
+                    </option>
+                    {positions.map((position) => (
+                      <option key={position.value} value={position.value}>
+                        {position.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 {!isAdmin && <NotAdminMessage />}
