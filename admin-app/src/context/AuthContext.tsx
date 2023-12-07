@@ -24,7 +24,7 @@ export const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const config = getConfig();
   const router = useRouter();
-  const signInUrl = config.apiURL + "/api/v1/auth/signin";
+  const signInUrl = config.mainServiceURL + "/api/v1/auth/signin";
   const [auth, setAuth] = useState<Auth | null>(null);
 
   const signIn = async (auth: AuthRequest) => {
@@ -32,7 +32,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
       const response = await axios.post(signInUrl, auth);
       await setAuthCookie(response.data);
       setAuth(response.data);
-      console.log(response.data);
     } catch (error) {
       throw new Error(`Error signing in ${error}`);
     }
@@ -54,7 +53,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     getAuth();
   }, []);
-
 
   return (
     <AuthContext.Provider value={{ auth, setAuth, signIn, signOut }}>
