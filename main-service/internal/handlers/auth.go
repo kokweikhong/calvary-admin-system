@@ -12,6 +12,8 @@ import (
 
 type AuthHandler interface {
 	SignIn(w http.ResponseWriter, r *http.Request)
+	ResetPassword(w http.ResponseWriter, r *http.Request)
+	UpdatePassword(w http.ResponseWriter, r *http.Request)
 	RefreshToken(w http.ResponseWriter, r *http.Request)
 }
 
@@ -45,6 +47,66 @@ func (h *authHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.jsonH.WriteJSON(w, http.StatusOK, authUser)
+}
+
+func (h *authHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	type ResetPasswordRequest struct {
+		Email string `json:"email"`
+	}
+
+	resetPasswordRequest := &ResetPasswordRequest{}
+	if err := h.jsonH.ReadJSON(w, r, resetPasswordRequest); err != nil {
+		slog.Error("Error decoding request body", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	slog.Info("Reset password request", "email", resetPasswordRequest.Email)
+
+	if err := h.service.ResetPassword(resetPasswordRequest.Email); err != nil {
+		slog.Error("Error resetting password", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	successResponse := map[string]string{
+		"message": "Reset password email sent",
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, successResponse)
+}
+
+func (h *authHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	type UpdatePasswordRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Token    string `json:"token"`
+	}
+
+	updatePasswordRequest := &UpdatePasswordRequest{}
+	if err := h.jsonH.ReadJSON(w, r, updatePasswordRequest); err != nil {
+		slog.Error("Error decoding request body", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	slog.Info("Update password request", "email", updatePasswordRequest.Email)
+
+	if err := h.service.UpdatePassword(
+		updatePasswordRequest.Email,
+		updatePasswordRequest.Token,
+		updatePasswordRequest.Password,
+	); err != nil {
+		slog.Error("Error updating password", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	successResponse := map[string]string{
+		"message": "Password updated",
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, successResponse)
 }
 
 func (h *authHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {

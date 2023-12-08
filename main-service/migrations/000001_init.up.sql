@@ -73,3 +73,12 @@ CREATE TABLE IF NOT EXISTS inventory_outgoings (
     updated_by VARCHAR(255) NOT NULL DEFAULT '',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create the user reset password table
+CREATE TABLE IF NOT EXISTS user_reset_password (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) NOT NULL,
+    token VARCHAR(255) NOT NULL DEFAULT '',
+    expires TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+);

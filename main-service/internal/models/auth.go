@@ -26,3 +26,11 @@ type JWTPayload struct {
 	Issuer    string `json:"iss"`
 	ExpiresAt int64  `json:"expiresAt"`
 }
+
+type ResetPasswordResponse struct {
+	Id        string `json:"id" db:"id"`
+	UserID    string `json:"userId" db:"user_id"`
+	Token     string `json:"token" db:"token"`
+	ExpiresAt string `json:"expiresAt" db:"expires_at"`
+	CreatedAt string `json:"createdAt" db:"created_at"`
+}
