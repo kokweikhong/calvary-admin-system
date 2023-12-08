@@ -307,7 +307,7 @@ export default function UserProfileForm({
               htmlFor="photo"
               className="block text-sm font-medium leading-6 text-gray-900"
             >
-              Photo
+              Profile Image
             </label>
             <div className="mt-2 sm:col-span-2 sm:mt-0">
               <div className="flex items-center gap-x-3">
@@ -345,29 +345,9 @@ export default function UserProfileForm({
                       className="h-12 w-12 text-gray-300"
                       aria-hidden="true"
                     />
-                    <span>No Photo</span>
+                    <span>No Profile Image</span>
                   </Fragment>
                 )}
-              </div>
-            </div>
-          </div>
-
-          <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:py-6">
-            <label
-              htmlFor="profile-image"
-              className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5"
-            >
-              Profile Image
-            </label>
-            <div className="mt-2 sm:col-span-2 sm:mt-0">
-              <div className="flex space-x-2 items-center justify-start">
-                <PhotoIcon
-                  className="h-12 w-12 text-gray-300"
-                  aria-hidden="true"
-                />
-                <span className="text-gray-500 text-sm italic">
-                  {user.profileImage}
-                </span>
               </div>
             </div>
           </div>
@@ -453,7 +433,7 @@ export default function UserProfileForm({
           />
 
 
-          <div className="mt-6 flex items-center justify-end gap-x-6">
+          <div className="mt-6 flex items-center justify-end gap-x-6 py-4">
             {isAdmin && (
               <button
                 type="button"

@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
-import { Combobox } from '@headlessui/react'
-import { cn } from '@/lib/utils';
+import { useState } from 'react'
+import Image from 'next/image'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import useUsers from '@/hooks/useUsers';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import Image from 'next/image'
 import { isImageExt } from '@/lib/utils';
 import { config } from '@/lib/config';
 import { User } from '@/interfaces/user';
@@ -15,23 +13,16 @@ import UserProfileForm from '@/components/UserProfileForm';
 
 export default function UpdateUserPage() {
   const { useGetUsers } = useUsers();
-  const { data: users, error, isLoading } = useGetUsers();
-  const [query, setQuery] = useState('')
-  const [selectedPerson, setSelectedPerson] = useState(null)
+  const { data: users, isError, error, isLoading } = useGetUsers();
+  const [selectedPerson, setSelectedPerson] = useState<User>()
   const [openForm, setOpenForm] = useState(false)
 
-  const filteredUsers =
-    query === ''
-      ? users
-      : users?.filter((user) => {
-        return user.username.toLowerCase().includes(query.toLowerCase())
-      })
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (error) {
+  if (isError) {
     throw error;
   }
 
@@ -41,73 +32,66 @@ export default function UpdateUserPage() {
 
   return (
     <main>
-      <Combobox as="div" value={selectedPerson} onChange={setSelectedPerson}>
-        <Combobox.Label className="block text-sm font-medium leading-6 text-gray-900">Assigned to</Combobox.Label>
-        <div className="relative mt-2">
-          <Combobox.Input
-            className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            onChange={(event) => setQuery(event.target.value)}
-            displayValue={(user: User) => user?.username}
-          />
-          <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
-            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-          </Combobox.Button>
+      <div>
+        <ul
+          role="list"
+          className="divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl"
+        >
+          {users?.map((user) => (
+            <li key={user.email} className="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 sm:px-6">
+              <div className="flex gap-x-4">
 
-          {filteredUsers && (
-            <Combobox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {filteredUsers.map((user) => (
-                <Combobox.Option
-                  key={user.id}
-                  value={user}
-                  className={({ active }) =>
-                    cn(
-                      'relative cursor-default select-none py-2 pl-3 pr-9',
-                      active ? 'bg-indigo-600 text-white' : 'text-gray-900'
-                    )
-                  }
-                >
-                  {({ active, selected }) => (
-                    <>
-                      <div className="flex items-center">
-
-                        {isImageExt(user.profileImage) ? (
-                          <Image
-                            className="flex-shrink-0 rounded-full bg-gray-300"
-                            src={`${config.mainServiceURL}/${user.profileImage}`}
-                            alt={user.username}
-                            width={40}
-                            height={40}
-                          />
-                        ) : (
-                          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">
-                            <span className="text-sm font-medium leading-none text-white">
-                              {user.username.slice(0, 2).toUpperCase()}
-                            </span>
-                          </span>
-                        )}
-                        <span className={cn('ml-3 truncate', selected && 'font-semibold')}>{user.username}</span>
-                      </div>
-
-                      {selected && (
-                        <span
-                          className={cn(
-                            'absolute inset-y-0 right-0 flex items-center pr-4',
-                            active ? 'text-white' : 'text-indigo-600'
-                          )}
-                        >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                      )}
-                    </>
-                  )}
-                </Combobox.Option>
-              ))}
-            </Combobox.Options>
-          )}
-        </div>
-      </Combobox>
-
-      <button onClick={() => setOpenForm(true)}>Open form</button>
+                {user.profileImage !== "" &&
+                  isImageExt(user.profileImage) ? (
+                  <Image
+                    className="h-8 w-8 rounded-full bg-gray-50"
+                    src={`${config.mainServiceURL}/${user.profileImage}`}
+                    alt={user.username}
+                  />
+                ) : (
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">
+                    <span className="text-sm font-medium leading-none text-white">
+                      {user.username.slice(0, 2).toUpperCase()}
+                    </span>
+                  </span>
+                )}
+                <div className="min-w-0 flex-auto">
+                  <p className="text-sm font-semibold leading-6 text-gray-900">
+                    <button
+                      onClick={() => {
+                        setSelectedPerson(user);
+                        setOpenForm(true);
+                      }}
+                    >
+                      <span className="absolute inset-x-0 -top-px bottom-0" />
+                      {user.username}
+                    </button>
+                  </p>
+                  <p className="mt-1 flex text-xs leading-5 text-gray-500">
+                    <a href={`mailto:${user.email}`} className="relative truncate hover:underline">
+                      {user.email}
+                    </a>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-x-4">
+                <div className="hidden sm:flex sm:flex-col sm:items-end">
+                  <p className="text-sm leading-6 text-gray-900">
+                    `${user.position || "No position"} / ${user.department || "No department"}`
+                  </p>
+                  <div className="mt-1 flex items-center gap-x-1.5">
+                    <div className="flex-none rounded-full bg-emerald-500/20 p-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    </div>
+                    <p className="text-xs leading-5 text-gray-500">{user.role}</p>
+                  </div>
+                </div>
+                <ChevronRightIcon className="h-5 w-5 flex-none text-gray-400" aria-hidden="true" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <SlideOver open={openForm} setOpen={setOpenForm}>
         {selectedPerson ? (
@@ -123,6 +107,6 @@ export default function UpdateUserPage() {
         )}
 
       </SlideOver>
-    </main>
+    </main >
   )
 }

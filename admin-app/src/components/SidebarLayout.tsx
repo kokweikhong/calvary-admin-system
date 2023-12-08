@@ -153,7 +153,7 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                     <Menu.Button className="-m-1.5 flex items-center p-1.5">
                       <span className="sr-only">Open user menu</span>
                       {auth?.user?.profileImage !== "" &&
-                      auth?.user?.profileImage ? (
+                        auth?.user?.profileImage ? (
                         <Image
                           className="h-8 w-8 rounded-full bg-gray-50"
                           src={`${config.mainServiceURL}/${auth?.user?.profileImage}`}
