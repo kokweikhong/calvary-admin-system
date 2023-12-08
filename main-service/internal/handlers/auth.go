@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/models"
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/services"
 	"github.com/kokweikhong/calvary-admin-system/main-service/internal/utils"
@@ -14,6 +15,7 @@ type AuthHandler interface {
 	SignIn(w http.ResponseWriter, r *http.Request)
 	ResetPassword(w http.ResponseWriter, r *http.Request)
 	UpdatePassword(w http.ResponseWriter, r *http.Request)
+	GetEmailFromResetPasswordToken(w http.ResponseWriter, r *http.Request)
 	RefreshToken(w http.ResponseWriter, r *http.Request)
 }
 
@@ -104,6 +106,23 @@ func (h *authHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	successResponse := map[string]string{
 		"message": "Password updated",
+	}
+
+	h.jsonH.WriteJSON(w, http.StatusOK, successResponse)
+}
+
+func (h *authHandler) GetEmailFromResetPasswordToken(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+
+	email, err := h.service.GetEmailFromResetPasswordToken(token)
+	if err != nil {
+		slog.Error("Error getting email from reset password token", "error", err)
+		h.jsonH.ErrorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+
+	successResponse := map[string]string{
+		"email": email,
 	}
 
 	h.jsonH.WriteJSON(w, http.StatusOK, successResponse)

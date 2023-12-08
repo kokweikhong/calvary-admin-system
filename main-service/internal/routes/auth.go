@@ -10,8 +10,9 @@ func NewAuthRouter(r chi.Router) {
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/signin", h.SignIn)
+		r.Get("/reset-password/{token}", h.GetEmailFromResetPasswordToken)
 		r.Post("/reset-password", h.ResetPassword)
-		r.Post("/update-password", h.UpdatePassword)
+		r.Put("/update-password", h.UpdatePassword)
 		r.Post("/refresh-token", h.RefreshToken)
 	})
 

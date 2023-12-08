@@ -4,6 +4,8 @@ import { useState, useEffect, FormEvent } from "react"
 import { useSearchParams } from "next/navigation"
 import { useForm, SubmitHandler } from "react-hook-form"
 import { KeyIcon } from "@heroicons/react/24/outline"
+import { resetPassword, updatePassword, getEmailFromToken } from "@/lib/reset-password"
+import Swal from "sweetalert2"
 
 type ResetPasswordProps = {
   email: string
@@ -15,7 +17,6 @@ export default function ResetPasswordPage() {
   const [passwordError, setPasswordError] = useState<string>("")
 
   const params = useSearchParams()
-  console.log(params.get("token"))
 
   const form = useForm({
     defaultValues: {
@@ -24,6 +25,19 @@ export default function ResetPasswordPage() {
       confirmPassword: "",
     },
   })
+
+  async function getEmail(token: string) {
+    const response = await getEmailFromToken(token)
+    if (response) {
+      form.setValue("email", response)
+    }
+  }
+
+  useEffect(() => {
+    if (params.has("token")) {
+      getEmail(params.get("token")!)
+    }
+  }, [params.has("token")])
 
   const newPassword = form.watch("password")
 
@@ -39,12 +53,43 @@ export default function ResetPasswordPage() {
 
   const onSubmit: SubmitHandler<ResetPasswordProps> = async (data) => {
     console.log(data)
+    try {
+      await updatePassword(data.email, data.password, params.get("token")!)
+      Swal.fire({
+        title: "Password updated!",
+        text: "Your password has been updated successfully.",
+        icon: "success",
+        confirmButtonText: "Ok",
+      })
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: `Update password failed: ${error}`,
+        icon: "error",
+        confirmButtonText: "Ok",
+      })
+    }
   }
 
   const onResetPassword = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const email = e.currentTarget["email-address-reset"].value
-    console.log(email)
+    try {
+      await resetPassword(email)
+      Swal.fire({
+        title: "Email sent!",
+        text: "Please check your email for a link to reset your password.",
+        icon: "success",
+        confirmButtonText: "Ok",
+      })
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: `Reset password failed: ${error}`,
+        icon: "error",
+        confirmButtonText: "Ok",
+      })
+    }
   }
 
 

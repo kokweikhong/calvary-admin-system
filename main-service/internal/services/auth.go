@@ -16,8 +16,10 @@ import (
 
 type AuthService interface {
 	SignIn(request *models.AuthSignInRequest) (*models.AuthUser, error)
+
 	ResetPassword(email string) error
 	UpdatePassword(email string, token string, password string) error
+	GetEmailFromResetPasswordToken(token string) (string, error)
 
 	RefreshToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error)
 	VerifyToken(tokenString string) (bool, error)
@@ -215,6 +217,46 @@ func (s *authService) UpdatePassword(email string, token string, password string
 
 	return nil
 }
+
+func (s *authService) GetEmailFromResetPasswordToken(token string) (string, error) {
+	db := db.GetDB()
+
+	queryStr := `
+		SELECT
+			user_id,
+			u.email
+		FROM
+			users_reset_passwords
+		INNER JOIN users u ON
+			u.id = user_id
+		WHERE
+			token = $1 AND expires_at > CURRENT_TIMESTAMP
+		ORDER BY
+			when_ DESC LIMIT 1
+	`
+
+	stmt, err := db.Prepare(queryStr)
+	if err != nil {
+		return "", err
+	}
+
+	row := stmt.QueryRow(token)
+
+	var userID int
+	var email string
+	err = row.Scan(
+		&userID,
+		&email,
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return email, nil
+}
+
+
 
 func (s *authService) RefreshToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error) {
 	isVerified, err := s.VerifyToken(refreshToken)

@@ -19,12 +19,15 @@ export async function getEmailFromToken(token: string) {
   return response.data;
 }
 
-export async function updatePassword(token: string, password: string) {
-  const response = await axiosResetPassword.put(
-    `/auth/reset-password/${token}`,
-    {
-      password,
-    },
-  );
+export async function updatePassword(
+  email: string,
+  password: string,
+  token: string,
+) {
+  const response = await axiosResetPassword.put(`/auth/update-password`, {
+    email: email,
+    password: password,
+    token: token,
+  });
   return response.data;
 }
