@@ -9,6 +9,9 @@ import {
   BellIcon,
   ChevronDownIcon,
   XMarkIcon,
+  UserIcon,
+  KeyIcon,
+  ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +19,9 @@ import React from "react";
 import calavaryLogo from "../../public/logo_hori.png";
 import NavLinks from "./NavLinks";
 
-const userNavigation = [{ name: "Your Profile", href: "#" }];
+const userNavigation = [
+  { name: "Your Profile", href: "/users/update" },
+];
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -188,32 +193,49 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-                        {userNavigation.map((item) => (
-                          <Menu.Item key={item.name}>
-                            {({ active }) => (
-                              <a
-                                href={item.href}
-                                className={classNames(
-                                  active ? "bg-gray-50" : "",
-                                  "block px-3 py-1 text-sm leading-6 text-gray-900"
-                                )}
-                              >
-                                {item.name}
-                              </a>
-                            )}
-                          </Menu.Item>
-                        ))}
+                      <Menu.Items className="absolute right-0 z-10 mt-2.5 w-auto origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
                         <Menu.Item>
-                          <button
-                            className={cn(
-                              "block px-3 py-1 text-sm leading-6 text-gray-900",
-                              "hover:bg-gray-50 w-full text-left"
-                            )}
-                            onClick={signOut}
-                          >
-                            Sign Out
-                          </button>
+                          {({ active }) => (
+                            <Link
+                              href={`/users/update/${auth?.user?.id}`}
+                              className={classNames(
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                'group flex items-center px-4 py-2 text-sm whitespace-nowrap'
+                              )}
+                            >
+                              <UserIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                              Your Profile
+                            </Link>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <Link
+                              href={`/users/reset-password`}
+                              className={classNames(
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                'group flex items-center px-4 py-2 text-sm whitespace-nowrap'
+                              )}
+                            >
+                              <KeyIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                              Reset Password
+                            </Link>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={cn(
+                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                'group flex items-center px-4 py-2 text-sm whitespace-nowrap',
+                                'w-full'
+                              )}
+                              onClick={signOut}
+                            >
+                              <ArrowLeftOnRectangleIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                              Sign Out
+                            </button>
+                          )}
                         </Menu.Item>
                       </Menu.Items>
                     </Transition>

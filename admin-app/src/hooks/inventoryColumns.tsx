@@ -11,7 +11,7 @@ import {
   InventoryOutgoing,
   InventoryProduct,
 } from "@/interfaces/inventory";
-import { getConfig } from "@/lib/config";
+import { config } from "@/lib/config";
 import { cn, isImageExt } from "@/lib/utils";
 import {
   DocumentTextIcon,
@@ -28,16 +28,17 @@ import Swal from "sweetalert2";
 import useInventoryIncomings from "./useInventoryIncomings";
 import useInventoryOutgoings from "./useInventoryOutgoings";
 import useInventoryProducts from "./useInventoryProducts";
-
-const config = getConfig();
+import useFilesystem from "./useFilesystem";
 
 const columnHelperInProduct = createColumnHelper<InventoryProduct>();
 
 export const useInventoryProductColumns = () => {
   const { useDeleteInventoryProduct } = useInventoryProducts();
+  const { useDeleteFile } = useFilesystem();
   const deleteProduct = useDeleteInventoryProduct();
+  const deleteFile = useDeleteFile();
 
-  async function handleDelete(id: number) {
+  async function handleDelete(data: InventoryProduct) {
     Swal.fire({
       title: "Are you sure?",
       text: "You will not be able to recover this product!",
@@ -50,7 +51,10 @@ export const useInventoryProductColumns = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteProduct.mutateAsync(id.toString());
+          await deleteProduct.mutateAsync(data.id.toString());
+          if (data.thumbnail !== "") {
+            await deleteFile.mutateAsync(data.thumbnail);
+          }
           Swal.fire({
             title: "Deleted!",
             text: "Your product has been deleted.",
@@ -105,7 +109,7 @@ export const useInventoryProductColumns = () => {
                     "text-gray-700",
                     "group flex items-center px-4 py-2 text-sm"
                   )}
-                  onClick={() => handleDelete(info.row.original.id)}
+                  onClick={() => handleDelete(info.row.original)}
                 >
                   <TrashIcon
                     className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
@@ -189,9 +193,11 @@ const columnHelperInIncoming = createColumnHelper<InventoryIncoming>();
 
 export const useInventoryIncomingColumns = () => {
   const { useDeleteInventoryIncoming } = useInventoryIncomings();
+  const { useDeleteFile } = useFilesystem();
   const { mutateAsync: deleteIncoming } = useDeleteInventoryIncoming();
+  const deleteFile = useDeleteFile();
 
-  function handleDelete(id: number) {
+  function handleDelete(data: InventoryIncoming) {
     Swal.fire({
       title: "Are you sure?",
       text: "You will not be able to recover this incoming!",
@@ -204,7 +210,10 @@ export const useInventoryIncomingColumns = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteIncoming(id.toString());
+          await deleteIncoming(data.id.toString());
+          if (data.refDoc !== "") {
+            await deleteFile.mutateAsync(data.refDoc);
+          }
           Swal.fire({
             title: "Deleted!",
             text: "Your incoming has been deleted.",
@@ -259,7 +268,7 @@ export const useInventoryIncomingColumns = () => {
                     "text-gray-700",
                     "group flex items-center px-4 py-2 text-sm"
                   )}
-                  onClick={() => handleDelete(info.row.original.id)}
+                  onClick={() => handleDelete(info.row.original as unknown as InventoryIncoming)}
                 >
                   <TrashIcon
                     className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
@@ -350,9 +359,11 @@ const columnHelperInOutgoing = createColumnHelper<InventoryOutgoing>();
 
 export const useInventoryOutgoingColumns = () => {
   const { useDeleteInventoryOutgoing } = useInventoryOutgoings();
-  const { mutate: deleteOutgoing } = useDeleteInventoryOutgoing();
+  const { useDeleteFile } = useFilesystem();
+  const deleteOutgoing = useDeleteInventoryOutgoing();
+  const deleteFile = useDeleteFile();
 
-  function handleDelete(id: number) {
+  function handleDelete(data: InventoryOutgoing) {
     Swal.fire({
       title: "Are you sure?",
       text: "You will not be able to recover this outgoing!",
@@ -362,9 +373,31 @@ export const useInventoryOutgoingColumns = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        deleteOutgoing(id.toString());
+        try {
+          await deleteOutgoing.mutateAsync(data.id.toString());
+          if (data.refDoc !== "") {
+            await deleteFile.mutateAsync(data.refDoc);
+          }
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your outgoing has been deleted.",
+            icon: "success",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#10B981",
+          });
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong!",
+            icon: "error",
+            confirmButtonText: "Ok",
+            confirmButtonColor: "#EF4444",
+          });
+        }
+
+
       }
     });
   }
@@ -403,7 +436,7 @@ export const useInventoryOutgoingColumns = () => {
                     "text-gray-700",
                     "group flex items-center px-4 py-2 text-sm"
                   )}
-                  onClick={() => handleDelete(info.row.original.id)}
+                  onClick={() => handleDelete(info.row.original)}
                 >
                   <TrashIcon
                     className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"

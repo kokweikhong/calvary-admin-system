@@ -1,5 +1,6 @@
 import useAxiosPrivate from "@/hooks/useAxiosPrivate";
 import { useMutation, useQueryClient } from "react-query";
+import Swal from "sweetalert2";
 
 const useFilesystem = () => {
   const queryClient = useQueryClient();
@@ -28,8 +29,37 @@ const useFilesystem = () => {
     );
   };
 
+  const useDeleteFile = () => {
+    return useMutation(
+      async (data: string) => {
+        const response = await axiosPrivate.delete(
+          `${filesystemURL}/files`,
+          {
+            data: {
+              path: data,
+            },
+          }
+        );
+        return response.data as string;
+      },
+      {
+        onError: (error) => {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `failed to delete file, ${error}`,
+          });
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries("filesystem");
+        },
+      }
+    );
+  };
+
   return {
     useUploadFile,
+    useDeleteFile,
   };
 };
 

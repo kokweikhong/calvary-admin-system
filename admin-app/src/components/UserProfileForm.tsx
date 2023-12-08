@@ -56,12 +56,13 @@ export default function UserProfileForm({
   action,
   isAdmin = false,
 }: UserProfileFormProps) {
-  const { useUploadFile } = useFilesystem();
-  const { useCreateUser, useUpdateUser } = useUsers();
+  const { useUploadFile, useDeleteFile } = useFilesystem();
+  const { useCreateUser, useUpdateUser, useDeleteUser } = useUsers();
   const createUser = useCreateUser();
-  const updateUser = useUpdateUser(user?.id?.toString() || "");
+  const updateUser = useUpdateUser(user.id?.toString() || "");
+  const deleteUser = useDeleteUser(user.id?.toString() || "");
   const uploadFile = useUploadFile();
-
+  const deleteFile = useDeleteFile();
 
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
 
@@ -70,13 +71,15 @@ export default function UserProfileForm({
   });
 
   const onSubmit: SubmitHandler<User> = async (data) => {
-
     if (coverPhoto) {
       const formData = new FormData();
       formData.append("file", coverPhoto);
       formData.append("saveDir", "users/profiles");
       await uploadFile.mutateAsync(formData, {
-        onSuccess: (path) => {
+        onSuccess: async (path) => {
+          if (data.profileImage !== "") {
+            await deleteFile.mutateAsync(data.profileImage);
+          }
           form.setValue("profileImage", path);
           data.profileImage = path;
           setCoverPhoto(null);
@@ -106,9 +109,14 @@ export default function UserProfileForm({
           icon: "success",
         });
       }
-    })
-
-
+    }).catch((error) => {
+      Swal.fire({
+        title: "Error!",
+        text: `User has not been ${action}d due to ${error}.`,
+        icon: "error",
+      });
+    });
+    form.reset();
   };
 
   return (
@@ -438,6 +446,31 @@ export default function UserProfileForm({
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                onClick={() => {
+                  Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover this user!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Delete",
+                    reverseButtons: true,
+                  }).then(async (result) => {
+                    if (result.isConfirmed) {
+                      await deleteUser.mutateAsync();
+                      Swal.fire({
+                        title: "Deleted!",
+                        text: "User has been deleted.",
+                        icon: "success",
+                      });
+                    }
+                  }).catch((error) => {
+                    Swal.fire({
+                      title: "Error!",
+                      text: `User has not been deleted due to ${error}.`,
+                      icon: "error",
+                    });
+                  });
+                }}
               >
                 Delete
               </button>

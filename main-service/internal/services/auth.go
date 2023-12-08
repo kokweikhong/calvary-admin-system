@@ -226,7 +226,7 @@ func (s *authService) GetEmailFromResetPasswordToken(token string) (string, erro
 			user_id,
 			u.email
 		FROM
-			users_reset_passwords
+			users_reset_password
 		INNER JOIN users u ON
 			u.id = user_id
 		WHERE
@@ -255,8 +255,6 @@ func (s *authService) GetEmailFromResetPasswordToken(token string) (string, erro
 
 	return email, nil
 }
-
-
 
 func (s *authService) RefreshToken(username, refreshToken string, duration time.Duration) (*models.JWTPayload, error) {
 	isVerified, err := s.VerifyToken(refreshToken)

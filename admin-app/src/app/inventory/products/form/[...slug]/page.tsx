@@ -46,15 +46,15 @@ export default function InventoryProductFormPage({
     useCreateInventoryProduct,
     useUpdateInventoryProduct,
   } = useInventoryProducts();
-  const { useUploadFile } = useFilesystem();
+  const { useUploadFile, useDeleteFile } = useFilesystem();
   const router = useRouter();
   const formType = params.slug[0];
   const productId = params.slug.length > 1 ? params.slug[1] : "";
   const product = useGetInventoryProduct(productId);
   const createProduct = useCreateInventoryProduct();
   const updateProduct = useUpdateInventoryProduct(productId);
-  // const uploadFile = useUploadFile();
   const uploadFile = useUploadFile();
+  const deleteFile = useDeleteFile();
   const [coverPhoto, setCoverPhoto] = React.useState<File | null>(null);
   const form = useForm<InventoryProduct>();
 
@@ -80,7 +80,10 @@ export default function InventoryProductFormPage({
       formData.append("file", coverPhoto);
       formData.append("saveDir", "inventory/products");
       await uploadFile.mutateAsync(formData, {
-        onSuccess: (path) => {
+        onSuccess: async (path) => {
+          if (form.watch("thumbnail") !== "") {
+            await deleteFile.mutateAsync(form.watch("thumbnail"));
+          }
           form.setValue("thumbnail", path);
           data.thumbnail = path;
           setCoverPhoto(null);

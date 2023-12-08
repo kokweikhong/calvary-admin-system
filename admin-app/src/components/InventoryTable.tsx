@@ -548,7 +548,7 @@ const InTableDialog: FC<InTableDialogProps> = ({
                 <div className="flex justify-center">
                   <Image
                     src={
-                      `${config.MainServiceURL}/${imgSrc}`
+                      `${config.mainServiceURL}/${imgSrc}`
                     }
                     alt="Product Image"
                     width={500}
@@ -573,7 +573,7 @@ const InTableDialog: FC<InTableDialogProps> = ({
                               "N/A"
                             ) : (
                               <a
-                                href={`${config.MainServiceURL}/${cell.row.getValue(cell.column.id)}`}
+                                href={`${config.mainServiceURL}/${cell.row.getValue(cell.column.id)}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="ml-2 text-indigo-600 hover:text-indigo-500"

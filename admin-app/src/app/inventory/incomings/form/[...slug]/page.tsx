@@ -67,7 +67,7 @@ export default function InventoryIncomingFormPage({
     useUpdateInventoryIncoming,
   } = useInventoryIncomings();
   const { useGetInventoryProducts } = useInventoryProducts();
-  const { useUploadFile } = useFilesystem();
+  const { useUploadFile, useDeleteFile } = useFilesystem();
   const router = useRouter();
   const formType = params.slug[0];
   const incomingId = params.slug.length > 1 ? params.slug[1] : "";
@@ -76,6 +76,7 @@ export default function InventoryIncomingFormPage({
   const updateIncoming = useUpdateInventoryIncoming(incomingId);
   const products = useGetInventoryProducts();
   const uploadFile = useUploadFile();
+  const deleteFile = useDeleteFile();
 
   const [refDoc, setRefDoc] = React.useState<File | null>(null);
 
@@ -97,13 +98,15 @@ export default function InventoryIncomingFormPage({
   }, [form, formType, incoming.data]);
 
   const onSubmit: SubmitHandler<InventoryIncoming> = async (data) => {
-    console.log(data);
     if (refDoc) {
       const formData = new FormData();
       formData.append("file", refDoc);
       formData.append("saveDir", "inventory/incomings");
       await uploadFile.mutateAsync(formData, {
-        onSuccess: (path) => {
+        onSuccess: async (path) => {
+          if (form.watch("refDoc") !== "") {
+            await deleteFile.mutateAsync(form.watch("refDoc"));
+          }
           form.setValue("refDoc", path);
           data.refDoc = path;
           setRefDoc(null);
@@ -190,7 +193,7 @@ export default function InventoryIncomingFormPage({
                       >
                         {products.data && products.data.length > 0 ? (
                           <>
-                            <option value="" disabled>
+                            <option value={0} disabled>
                               Please select a product
                             </option>
                             {products.data.map((product) => (

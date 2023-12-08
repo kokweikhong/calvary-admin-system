@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import calvaryLogo from "../../../../public/logo_hori.png";
+import Link from "next/link";
 
 export default function SignInPage() {
   const { auth, signIn } = useAuth();
@@ -95,12 +96,12 @@ export default function SignInPage() {
 
               <div className="flex items-center justify-between">
                 <div className="text-sm leading-6">
-                  <a
-                    href="#"
+                  <Link
+                    href="/users/reset-password"
                     className="font-semibold text-indigo-600 hover:text-indigo-500"
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
 

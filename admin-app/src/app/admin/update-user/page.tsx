@@ -44,9 +44,11 @@ export default function UpdateUserPage() {
                 {user.profileImage !== "" &&
                   isImageExt(user.profileImage) ? (
                   <Image
-                    className="h-8 w-8 rounded-full bg-gray-50"
+                    className="rounded-full bg-gray-50"
                     src={`${config.mainServiceURL}/${user.profileImage}`}
                     alt={user.username}
+                    width={32}
+                    height={32}
                   />
                 ) : (
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">
@@ -76,8 +78,8 @@ export default function UpdateUserPage() {
               </div>
               <div className="flex items-center gap-x-4">
                 <div className="hidden sm:flex sm:flex-col sm:items-end">
-                  <p className="text-sm leading-6 text-gray-900">
-                    `${user.position || "No position"} / ${user.department || "No department"}`
+                  <p className="text-sm leading-6 text-gray-900 capitalize">
+                    {`${user.position || "No position"} / ${user.department || "No department"}`}
                   </p>
                   <div className="mt-1 flex items-center gap-x-1.5">
                     <div className="flex-none rounded-full bg-emerald-500/20 p-1">

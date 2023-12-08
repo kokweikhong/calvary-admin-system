@@ -1,8 +1,9 @@
 "use client";
 
 import UserProfileForm from "@/components/UserProfileForm";
-import { User, emptyUser } from "@/interfaces/user";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { User } from "@/interfaces/user";
+import useUsers from "@/hooks/useUsers";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function UserUpdatePage({
   params,
@@ -10,19 +11,27 @@ export default function UserUpdatePage({
   params: { slug: string };
 }) {
   const userId = params.slug;
-  console.log(userId);
+  const { useGetUser } = useUsers()
+  const user = useGetUser(userId)
 
-  const form = useForm<User>({
-    defaultValues: emptyUser,
-  });
+  // if (user.isLoading) {
+  //   return <LoadingSpinner />;
+  // }
 
-  const onSubmit: SubmitHandler<User> = (data) => {
-    console.log(data);
-  };
+  if (user.isError) {
+    return <div>failed to load</div>;
+  }
+
+  if (!user.data) {
+    return <div>no user</div>;
+  }
 
   return (
     <div>
-      <UserProfileForm user={emptyUser} action="update" />
+      <UserProfileForm
+        user={user.data as User}
+        action="update"
+        isAdmin={user.data.role === "admin"} />
     </div>
   );
 }

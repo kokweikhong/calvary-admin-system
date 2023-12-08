@@ -122,15 +122,20 @@ func (f *fileSystemService) GetFiles() ([]string, error) {
 }
 
 func (f *fileSystemService) Delete(path string) error {
-	// add current working directory to path
-	path = filepath.Join(defaultPath, path)
+	currentPath, _ := os.Getwd()
+	path = filepath.Join(currentPath, path)
+
 
 	// check if file exists
-	_, err := os.Stat(path)
+	file, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		// file does not exist, return nil
 		return nil
 	}
+
+    if file.IsDir() {
+        return nil
+    }
 
 	// file exists, delete it
 	// remove file

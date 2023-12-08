@@ -58,7 +58,7 @@ export default function InventoryOutgoingFormPage({
     useCreateInventoryOutgoing,
     useUpdateInventoryOutgoing,
   } = useInventoryOutgoings();
-  const { useUploadFile } = useFilesystem();
+  const { useUploadFile, useDeleteFile } = useFilesystem();
 
   const router = useRouter();
   const formType = params.slug[0];
@@ -69,6 +69,7 @@ export default function InventoryOutgoingFormPage({
   const createOutgoing = useCreateInventoryOutgoing();
   const updateOutgoing = useUpdateInventoryOutgoing(outgoingId);
   const uploadFile = useUploadFile();
+  const deleteFile = useDeleteFile();
 
   const [refDoc, setRefDoc] = React.useState<File | null>(null);
 
@@ -138,13 +139,15 @@ export default function InventoryOutgoingFormPage({
   }, [form, formType, outgoing.data]);
 
   const onSubmit: SubmitHandler<InventoryOutgoing> = async (data) => {
-    console.log(data);
     if (refDoc) {
       const formData = new FormData();
       formData.append("file", refDoc);
-      formData.append("saveDir", "inventory/incomings");
+      formData.append("saveDir", "inventory/outgoings");
       await uploadFile.mutateAsync(formData, {
-        onSuccess: (path) => {
+        onSuccess: async (path) => {
+          if (form.watch("refDoc") !== "") {
+            await deleteFile.mutateAsync(form.watch("refDoc"));
+          }
           form.setValue("refDoc", path);
           data.refDoc = path;
           setRefDoc(null);
@@ -264,8 +267,8 @@ export default function InventoryOutgoingFormPage({
                                   : ""}{" "}
                                 {incoming.height > 0 ? incoming.height : ""}{" "}
                                 {incoming.length > 0 ||
-                                incoming.width > 0 ||
-                                incoming.height > 0
+                                  incoming.width > 0 ||
+                                  incoming.height > 0
                                   ? incoming.unit
                                   : ""}
                               </option>

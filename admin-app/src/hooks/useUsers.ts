@@ -70,8 +70,8 @@ const useUsers = () => {
         return response.data;
       },
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries("users");
+        onSuccess: (data) => {
+          queryClient.setQueryData(["user", id], data);
         },
         onError: (error) => {
           throw new Error(`Error updating user: ${error}`);
