@@ -18,13 +18,13 @@ import useInventoryProducts from "@/hooks/useInventoryProducts";
 
 export default function InventoryPage() {
   const config = getConfig();
-  const { getInventoryProductSummary } = useInventoryProducts();
+  const { useGetInventoryProductSummary } = useInventoryProducts();
   const {
     data: products,
     isLoading,
     isError,
     error,
-  } = getInventoryProductSummary();
+  } = useGetInventoryProductSummary();
 
   const [filteredProducts, setFilteredProducts] = useState<
     InventoryProductSummary[]
@@ -100,7 +100,7 @@ export default function InventoryPage() {
                       {product.thumbnail !== "" ? (
                         <Image
                           loader={({ src, width, quality }) => {
-                            return `${config.apiURL
+                            return `${config.mainServiceURL
                               }/${src}?w=${width}&q=${quality || 75}`;
                           }}
                           src={product.thumbnail}

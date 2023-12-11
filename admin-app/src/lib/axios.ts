@@ -1,10 +1,10 @@
 import { config } from "@/lib/config";
 import axios from "axios";
 
-// const config = getConfig();
 
 export const axiosPrivate = axios.create({
   baseURL: config.mainServiceURL,
+  // baseURL: "http://calvary-main-service"
   // headers: {
   //   "Content-Type": "application/json",
   // },

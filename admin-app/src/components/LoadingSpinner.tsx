@@ -26,13 +26,12 @@ const LoadingSpinner = ({
             className
           )}
         ></span>
-        <span className="font-medium">{`Loading${
-          label ? " " + label + " " : ""
-        }...`}</span>
+        <span className="font-medium">{`Loading${label ? " " + label + " " : ""
+          }...`}</span>
       </div>
 
       <p className="text-gray-500">
-        This may take a few seconds, please don't close this page.
+        {`This may take a few seconds, please don't close this page.`}
       </p>
     </div>
   );

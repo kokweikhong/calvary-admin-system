@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -26,11 +27,11 @@ func Init() error {
 		return err
 	}
 
-	envLocation := wd + "/.env"
+	envLocation := filepath.Join(wd + ".env")
 
 	if err := godotenv.Load(envLocation); err != nil {
 		slog.Error("Error loading .env file", "error", err)
-		return err
+		// return err
 	}
 
 	Cfg.PostgresHost = os.Getenv("POSTGRES_HOST")
@@ -42,6 +43,8 @@ func Init() error {
 	Cfg.ServerPort = os.Getenv("SERVER_PORT")
 
 	Cfg.JWTSecret = os.Getenv("JWT_SECRET")
+
+	slog.Info("Config loaded successfully", "config", Cfg)
 
 	return nil
 }

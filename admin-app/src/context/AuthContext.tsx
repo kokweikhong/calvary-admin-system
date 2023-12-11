@@ -2,7 +2,7 @@
 
 import { getAuthCookie, removeAuthCookie, setAuthCookie } from "@/actions/auth";
 import { Auth, AuthRequest } from "@/interfaces/auth";
-import { getConfig } from "@/lib/config";
+import { config } from "@/lib/config";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { FC, ReactNode, createContext, useEffect, useState } from "react";
@@ -22,7 +22,6 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const config = getConfig();
   const router = useRouter();
   const signInUrl = config.mainServiceURL + "/api/v1/auth/signin";
   const [auth, setAuth] = useState<Auth | null>(null);

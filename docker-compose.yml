@@ -23,6 +23,8 @@ services:
       - calvary-network
     depends_on:
       - postgres
+    env_file:
+      - "./main-service/.env"
     volumes:
       - ./uploads:/app/uploads
     

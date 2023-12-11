@@ -22,6 +22,8 @@ COPY --from=build-stage /app/bin/main-service /app/bin/main-service
 
 # Copy the environment file
 COPY --from=build-stage /app/.env /app/.env
+COPY --from=build-stage /app/internal/config/.env /app/internal/config/.env
+COPY --from=build-stage /app/.env /app/bin/.env
 
 USER nonroot:nonroot
 

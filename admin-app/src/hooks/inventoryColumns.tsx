@@ -185,7 +185,7 @@ export const useInventoryProductColumns = () => {
         header: "Remarks",
       }),
     ],
-    []
+    [handleDelete]
   );
 };
 
@@ -351,7 +351,7 @@ export const useInventoryIncomingColumns = () => {
         header: "Remarks",
       }),
     ],
-    []
+    [handleDelete]
   );
 };
 

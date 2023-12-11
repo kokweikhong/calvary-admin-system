@@ -37,7 +37,7 @@ export default function SignInPage() {
     if (auth) {
       router.push("/");
     }
-  }, [auth]);
+  }, [auth, router]);
 
   return (
     <div>

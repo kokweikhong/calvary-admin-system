@@ -138,7 +138,7 @@ const InventoryTable: FC<
   useEffect(() => {
     if (!table.getIsSomeRowsSelected()) return;
     setOpenDialog(true);
-  }, [rowSelection]);
+  }, [rowSelection, table]);
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -426,7 +426,7 @@ export function InTableDebouncedInput({
     }, debounce);
 
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [value, onChange, debounce]);
 
   return (
     <input

@@ -112,6 +112,8 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
               className="h-full w-auto object-cover"
               src={calavaryLogo}
               alt="Calvary Carpentry Pte Ltd"
+              width={200}
+              height={50}
             />
           </div>
           <NavLinks />
@@ -160,9 +162,11 @@ const SidebarLayout = ({ children }: { children: React.ReactNode }) => {
                       {auth?.user?.profileImage !== "" &&
                         auth?.user?.profileImage ? (
                         <Image
-                          className="h-8 w-8 rounded-full bg-gray-50"
+                          className="rounded-full bg-gray-50"
                           src={`${config.mainServiceURL}/${auth?.user?.profileImage}`}
                           alt={auth?.user?.username}
+                          width={32}
+                          height={32}
                         />
                       ) : (
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500">

@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     if (params.has("token")) {
       getEmail(params.get("token")!)
     }
-  }, [params.has("token")])
+  }, [])
 
   const newPassword = form.watch("password")
 

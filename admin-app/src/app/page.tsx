@@ -39,8 +39,8 @@ export default function Home() {
           Calvary Carpentry Admin System
         </h2>
         <p className="mt-6 text-lg leading-8 text-gray-300">
-          This is the admin system for Calvary Carpentry Pte Ltd. It is used to
-          manage the company's inventory, projects, employees, and more.
+          {`This is the admin system for Calvary Carpentry Pte Ltd. It is used to
+          manage the company's inventory, projects, employees, and more.`}
         </p>
       </div>
     </div>
