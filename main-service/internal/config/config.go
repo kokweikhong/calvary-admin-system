@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -27,10 +28,10 @@ func Init() error {
 		return err
 	}
 
-	envLocation := filepath.Join(wd + ".env")
+	envLocation := filepath.Join(wd + "/.env")
 
 	if err := godotenv.Load(envLocation); err != nil {
-		slog.Error("Error loading .env file", "error", err)
+		slog.Error(fmt.Sprintf("Error loading .env file from %s", envLocation), "error", err)
 		// return err
 	}
 

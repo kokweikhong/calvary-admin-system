@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import { imageLoader } from "@/lib/utils";
 
 const emptyProduct: InventoryProduct = {
   id: 0,
@@ -440,9 +441,10 @@ export default function InventoryProductFormPage({
                             />
                           ) : field.value !== "" ? (
                             <Image
+                              loader={imageLoader}
                               src={
                                 field.value !== ""
-                                  ? `http://localhost:8080/${field.value}`
+                                  ? field.value
                                   : "/images/placeholder.png"
                               }
                               alt=""

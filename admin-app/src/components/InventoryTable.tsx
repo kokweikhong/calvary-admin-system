@@ -57,6 +57,7 @@ import {
 import Image from "next/image";
 import { isImageExt } from "@/lib/utils";
 import { config } from "@/lib/config";
+import { imageLoader } from "@/lib/utils";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -534,10 +535,6 @@ const InTableDialog: FC<InTableDialogProps> = ({
     }
   }
 
-
-
-  console.log(imgSrc);
-
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogContent>
@@ -547,9 +544,11 @@ const InTableDialog: FC<InTableDialogProps> = ({
               {imgSrc ? (
                 <div className="flex justify-center">
                   <Image
-                    src={
-                      `${config.mainServiceURL}/${imgSrc}`
-                    }
+                    loader={imageLoader}
+                    src={imgSrc}
+                    // src={
+                    //   `${config.mainServiceURL}/${imgSrc}`
+                    // }
                     alt="Product Image"
                     width={500}
                     height={500}

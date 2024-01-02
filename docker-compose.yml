@@ -24,12 +24,12 @@ services:
     depends_on:
       - postgres
     env_file:
-      - "./main-service/.env"
+      - "./main-service/docker.env"
     volumes:
-      - ./uploads:/app/uploads
+      - ./main-service/uploads:/app/uploads
     
   postgres:
-    image: postgres:12.1-alpine
+    image: postgres:16.1-alpine3.19
     container_name: 'calvary-postgres'
     restart: always
     environment:

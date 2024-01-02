@@ -1,8 +1,10 @@
 package services
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type FileSystemService interface {
@@ -20,7 +22,7 @@ func NewFileSystemService() FileSystemService {
 	return &fileSystemService{}
 }
 
-var defaultPath = "./uploads"
+var defaultPath = "uploads"
 
 func Init() {
 	path := os.Getenv("UPLOAD_PATH")
@@ -31,13 +33,17 @@ func Init() {
 
 func (f *fileSystemService) Upload(filename, savePath string, fileBytes []byte) (string, error) {
 	// join defaultPath and savePath
-	joinedPath := filepath.Join(defaultPath, savePath)
+	joinedPath := filepath.Join("/app/", defaultPath, savePath)
+
+	// joinedPath = strings.Replace(joinedPath, "app/", "", 1)
 
 	// check if path exists and if not, create it
 	_, err := os.Stat(joinedPath)
+	slog.Info("joinedPath", "joinedPath", joinedPath)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(joinedPath, 0755)
 		if err != nil {
+			slog.Error("create dir error", "err", err)
 			return "", err
 		}
 	}
@@ -53,6 +59,10 @@ func (f *fileSystemService) Upload(filename, savePath string, fileBytes []byte) 
 	if err != nil {
 		return "", err
 	}
+
+	joinedPath = strings.Replace(joinedPath, "/app/", "", 1)
+
+	slog.Info("joinedPath", "joinedPath", joinedPath)
 
 	// return full path
 	return filepath.Join(joinedPath, filename), nil
@@ -125,7 +135,6 @@ func (f *fileSystemService) Delete(path string) error {
 	currentPath, _ := os.Getwd()
 	path = filepath.Join(currentPath, path)
 
-
 	// check if file exists
 	file, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -133,9 +142,9 @@ func (f *fileSystemService) Delete(path string) error {
 		return nil
 	}
 
-    if file.IsDir() {
-        return nil
-    }
+	if file.IsDir() {
+		return nil
+	}
 
 	// file exists, delete it
 	// remove file

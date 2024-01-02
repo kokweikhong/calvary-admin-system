@@ -29,6 +29,7 @@ import useInventoryIncomings from "./useInventoryIncomings";
 import useInventoryOutgoings from "./useInventoryOutgoings";
 import useInventoryProducts from "./useInventoryProducts";
 import useFilesystem from "./useFilesystem";
+import { imageLoader } from "@/lib/utils";
 
 const columnHelperInProduct = createColumnHelper<InventoryProduct>();
 
@@ -128,7 +129,9 @@ export const useInventoryProductColumns = () => {
           isImageExt(info.row.original.thumbnail) ? (
             <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-200 group-hover:opacity-75">
               <Image
-                src={`${config.mainServiceURL}/${info.row.original.thumbnail}`}
+                loader={imageLoader}
+                // src={`${config.mainServiceURL}/${info.row.original.thumbnail}`}
+                src={info.row.original.thumbnail}
                 alt="Profile Image"
                 sizes="(min-width: 640px) 300px, 50vw (max-width: 640px 100vw)"
                 width={500}
